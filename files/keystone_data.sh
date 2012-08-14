@@ -7,6 +7,7 @@
 # admin                admin     admin
 # service              glance    admin
 # service              nova      admin, [ResellerAdmin (swift only)]
+# service              cheetah   admin
 # service              quantum   admin        # if enabled
 # service              swift     admin        # if enabled
 # service              cinder    admin        # if enabled
@@ -27,7 +28,7 @@
 
 # Defaults
 # --------
-
+SAVI_PASSWORD=${SAVI_PASSWORD:-supersecret}
 ADMIN_PASSWORD=${ADMIN_PASSWORD:-secrete}
 SERVICE_PASSWORD=${SERVICE_PASSWORD:-$ADMIN_PASSWORD}
 export SERVICE_TOKEN=$SERVICE_TOKEN
@@ -41,7 +42,7 @@ function get_id () {
 
 # Tenants
 # -------
-
+SAVI_TENANT=$(get_id keystone tenant-create --name=savi)
 ADMIN_TENANT=$(get_id keystone tenant-create --name=admin)
 SERVICE_TENANT=$(get_id keystone tenant-create --name=$SERVICE_TENANT_NAME)
 DEMO_TENANT=$(get_id keystone tenant-create --name=demo)
@@ -51,17 +52,21 @@ INVIS_TENANT=$(get_id keystone tenant-create --name=invisible_to_admin)
 # Users
 # -----
 
+SAVI_USER=$(get_id keystone user-create --name=savi \
+                                         --pass="$SAVI_PASSWORD" \
+                                         --email=savi@savinetwork.ca)
 ADMIN_USER=$(get_id keystone user-create --name=admin \
                                          --pass="$ADMIN_PASSWORD" \
-                                         --email=admin@example.com)
+                                         --email=admin@savinetwork.ca)
 DEMO_USER=$(get_id keystone user-create --name=demo \
                                         --pass="$ADMIN_PASSWORD" \
-                                        --email=demo@example.com)
+                                        --email=demo@savinetwork.ca)
 
 
 # Roles
 # -----
 
+SAVI_ROLE=$(get_id keystone role-create --name=savi)
 ADMIN_ROLE=$(get_id keystone role-create --name=admin)
 KEYSTONEADMIN_ROLE=$(get_id keystone role-create --name=KeystoneAdmin)
 KEYSTONESERVICE_ROLE=$(get_id keystone role-create --name=KeystoneServiceAdmin)
@@ -71,6 +76,8 @@ ANOTHER_ROLE=$(get_id keystone role-create --name=anotherrole)
 
 
 # Add Roles to Users in Tenants
+
+keystone user-role-add --user_id $SAVI_USER --role_id $SAVI_ROLE --tenant_id $SAVI_TENANT
 keystone user-role-add --user_id $ADMIN_USER --role_id $ADMIN_ROLE --tenant_id $ADMIN_TENANT
 keystone user-role-add --user_id $ADMIN_USER --role_id $ADMIN_ROLE --tenant_id $DEMO_TENANT
 keystone user-role-add --user_id $DEMO_USER --role_id $ANOTHER_ROLE --tenant_id $DEMO_TENANT
@@ -88,6 +95,19 @@ keystone user-role-add --user_id $DEMO_USER --role_id $MEMBER_ROLE --tenant_id $
 
 # Services
 # --------
+#Cheetah
+if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+	CHEETAH_SERVICE=$(get_id cheetah service-create \
+		--name=cheetah \
+		--type=identity \
+		--description="Cheetah Control Service")
+	keystone endpoint-create \
+	    --region RegionOne \
+		--service_id $CHEETAH_SERVICE \
+		--publicurl "http://$SERVICE_HOST:9090/v2.0" \
+		--adminurl "http://$SERVICE_HOST:9090/v2.0" \
+		--internalurl "http://$SERVICE_HOST:9090/v2.0"
+fi
 
 # Keystone
 if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
