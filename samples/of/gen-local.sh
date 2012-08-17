@@ -102,6 +102,70 @@ if [ $SWIFT_DISK_SIZE_READ ]; then
   SWIFT_DISK_SIZE=$SWIFT_DISK_SIZE_READ
 fi
 
+#GLANCE CONFIG
+echo "Do you want to running both glance registry and glance api in the same machine?([y]/n)"
+read RUN_BOTH_GLANCE_REG_API
+if [[ "$RUN_BOTH_GLANCE_REG_API" == "n" ]]; then
+  echo "Which glance service do you want to run ([api]/registry)"
+  read GLANCE_SERVICE
+  if [[ "$GLANCE_SERVICE" == "registry" ]]; then
+    GLANCE_REGISTRY_ENABLED=true
+  else
+    GLANCE_API_ENABLED=true
+  fi
+else
+  GLANCE_REGISTRY_ENABLED=true
+  GLANCE_API_ENABLED=true
+fi  
+
+if [[ "$GLANCE_REGISTRY_ENABLED" == "true" ]]; then
+  echo "config glance registry"
+  echo "Enter the keystone host address for glance registry"
+  read GLANCE_REGISTRY_AUTH_HOST
+  echo "Enter the keystone port for glance registry"
+  read GLANCE_REGISTRY_AUTH_PORT
+fi
+
+if [[ "$GLANCE_API_ENABLED" == "true" ]]; then
+  #registry address for api
+  echo "config glance API"
+  echo "Enter the host address of the Glance registry server for this glance API"
+  read GLANCE_REGISTRY_HOST
+  echo "Enter the port of the Glance registry"
+  read GLANCE_REGISTRY_PORT
+
+  #cache
+  echo "Would you like to enable image cacheing in this API? ([y]/n)"
+  read GLANCE_API_USE_CACHE
+  if [[ "$GLANCE_API_USE_CACHE" == "n" ]]; then
+    GLANCE_API_FLAVOR=keystone
+  else
+    GLANCE_API_FLAVOR=keystone+cachemanagement
+    echo "Enter the time interval (in minutes) between each execution of glance-pruner tool [5]"
+    read GLANCE_CACHE_PRUNER_INTERVAL
+    if [ -z "$GLANCE_CACHE_PRUNER_INTERVAL" ]; then
+      GLANCE_CACHE_PRUNER_INTERVAL=5
+    fi
+    GLANCE_CACHE_PRUNER_INTERVAL="\/""$GLANCE_CACHE_PRUNER_INTERVAL"
+    echo "Enter the time interval (in minutes) between each execution of glance-cleaner tool [10]"
+    read GLANCE_CACHE_CLEANER_INTERVAL
+    if [ -z "$GLANCE_CACHE_CLEANER_INTERVAL" ]; then
+      GLANCE_CACHE_CLEANER_INTERVAL=10
+    fi
+    GLANCE_CACHE_CLEANER_INTERVAL="\/""$GLANCE_CACHE_CLEANER_INTERVAL"
+  fi
+
+  echo "Enter the max cache size for this glance API"
+  read GLANCE_CACHE_MAX_SIZE
+
+
+  #keystone
+  echo "Enter the keystone host address for glance api"
+  read GLANCE_API_AUTH_HOST
+  echo "Enter the keystone port for glance api"
+  read GLANCE_API_AUTH_PORT
+
+fi
 
 echo "Would you like to use OpenFlow? ([n]/y)"
 read USE_OF
@@ -137,6 +201,45 @@ if [[ $AGENT == 0 ]]; then
   else
     sed -i -e 's/RYU_ENABLED_/#/g' localrc
   fi
+  
+  if [[ $GLANCE_REGISTRY_ENABLED == "true" ]]; then
+    sed -i -e 's/GLANCE_REGISTRY_ENABLED_//g' localrc
+    if [[ $GLANCE_REGISTRY_AUTH_HOST ]]; then
+      sed -i -e 's/\${GLANCE_REGISTRY_AUTH_HOST}/'$GLANCE_REGISTRY_AUTH_HOST'/g' localrc
+    else
+      sed -i -e 's/GLANCE_REGISTRY_AUTH_HOST=\${GLANCE_REGISTRY_AUTH_HOST}//g' localrc
+    fi
+    if [[ $GLANCE_REGISTRY_AUTH_PORT ]]; then
+      sed -i -e 's/\${GLANCE_REGISTRY_AUTH_PORT}/'$GLANCE_REGISTRY_AUTH_PORT'/g' localrc
+    else
+      sed -i 's/GLANCE_REGISTRY_AUTH_PORT=\${GLANCE_REGISTRY_AUTH_PORT}//g' localrc
+    fi
+  else
+    sed -i -e 's/GLANCE_REGISTRY_ENABLED_/#/g' localrc
+  fi
+
+  if [[ $GLANCE_API_ENABLED == "true" ]]; then
+    sed -i -e 's/GLANCE_API_ENABLED_//g' localrc
+    sed -i -e 's/\${GLANCE_REGISTRY_HOST}/'$GLANCE_REGISTRY_HOST'/g' localrc
+    sed -i -e 's/\${GLANCE_REGISTRY_PORT}/'$GLANCE_REGISTRY_PORT'/g' localrc
+    sed -i -e 's/\${GLANCE_CACHE_MAX_SIZE}/'$GLANCE_CACHE_MAX_SIZE'/g' localrc
+    sed -i -e 's/\${GLANCE_API_FLAVOR}/'$GLANCE_API_FLAVOR'/g' localrc
+    sed -i -e 's/\${GLANCE_CACHE_PRUNER_INTERVAL}/'$GLANCE_CACHE_PRUNER_INTERVAL'/g' localrc
+    sed -i -e 's/\${GLANCE_CACHE_CLEANER_INTERVAL}/'$GLANCE_CACHE_CLEANER_INTERVAL'/g' localrc
+    if [[ $GLANCE_API_AUTH_HOST ]]; then 
+      sed -i -e 's/\${GLANCE_API_AUTH_HOST}/'$GLANCE_API_AUTH_HOST'/g' localrc
+    else
+      sed -i 's/GLANCE_API_AUTH_HOST=\${GLANCE_API_AUTH_HOST}//g' localrc
+    fi
+    if [[ $GLANCE_API_AUTH_PORT ]]; then
+      sed -i -e 's/\${GLANCE_API_AUTH_PORT}/'$GLANCE_API_AUTH_PORT'/g' localrc
+    else
+      sed -i 's/GLANCE_API_AUTH_PORT=\${GLANCE_API_AUTH_PORT}//g' localrc
+    fi
+  else
+    sed -i -e 's/GLANCE_API_ENABLED_/*/g' localrc
+  fi
+
 
   sed -i -e 's/\${HOST_IP_IFACE}/'$HOST_INT'/g' localrc
   sed -i -e 's/\${FLAT_INTERFACE}/'$FLAT_INT'/g' localrc
@@ -173,5 +276,3 @@ else
 fi
 
 echo "Now run ./stack.sh"
-
-
