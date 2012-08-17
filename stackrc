@@ -57,7 +57,7 @@ GLANCECLIENT_BRANCH=master
 
 # unified auth system (manages accounts/tokens)
 KEYSTONE_REPO=${GIT_BASE}/savi-dev/keystone.git
-KEYSTONE_BRANCH=master
+KEYSTONE_BRANCH=rbac-api
 
 # a websockets/html5 or flash powered VNC console for vm instances
 NOVNC_REPO=https://github.com/savi-dev/noVNC.git
@@ -77,7 +77,7 @@ OPENSTACKCLIENT_BRANCH=master
 
 # python keystone client library to nova that horizon uses
 KEYSTONECLIENT_REPO=${GIT_BASE}/savi-dev/python-keystoneclient
-KEYSTONECLIENT_BRANCH=master
+KEYSTONECLIENT_BRANCH=rbac-api
 
 # quantum service
 QUANTUM_REPO=${GIT_BASE}/savi-dev/quantum
