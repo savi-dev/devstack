@@ -534,12 +534,21 @@ read_password ADMIN_PASSWORD "ENTER A PASSWORD TO USE FOR HORIZON AND KEYSTONE (
 # Set the tenant for service accounts in Keystone
 SERVICE_TENANT_NAME=${SERVICE_TENANT_NAME:-service}
 
+while true; do
+    read -p "Do you wish to install this program?" yn
+    case $yn in
+        [Yy]* ) read -p "Please Enter Central Keystone IP address or hostname?" $KEYSTONE_AUTH_HOST; break;;
+        [Nn]* ) break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
 # Set Keystone interface configuration
 KEYSTONE_API_PORT=${KEYSTONE_API_PORT:-5000}
 KEYSTONE_AUTH_HOST=${KEYSTONE_AUTH_HOST:-$SERVICE_HOST}
 KEYSTONE_AUTH_PORT=${KEYSTONE_AUTH_PORT:-35357}
 KEYSTONE_AUTH_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
-KEYSTONE_SERVICE_HOST=${KEYSTONE_SERVICE_HOST:-$SERVICE_HOST}
+KEYSTONE_SERVICE_HOST=${KEYSTONE_AUTH_HOST:-$SERVICE_HOST}
 KEYSTONE_SERVICE_PORT=${KEYSTONE_SERVICE_PORT:-5000}
 KEYSTONE_SERVICE_PROTOCOL=${KEYSTONE_SERVICE_PROTOCOL:-http}
 
@@ -1819,7 +1828,7 @@ EOF
    cd WebOb-1.1.1
    sudo python setup.py install
    cd ..
-   
+
    swift-init all restart || true
    swift-init proxy stop || true
 
@@ -2136,7 +2145,7 @@ if is_service_enabled key; then
     " -i $KEYSTONE_CONF
     # Append the S3 bits
     iniset $KEYSTONE_CONF filter:s3_extension paste.filter_factory "keystone.contrib.s3:S3Extension.factory"
-
+    KEYSTONE_CATALOG_BACKEND="sql"
     if [[ "$KEYSTONE_CATALOG_BACKEND" = "sql" ]]; then
         # Configure keystone.conf to use sql
         iniset $KEYSTONE_CONF catalog driver keystone.catalog.backends.sql.Catalog
