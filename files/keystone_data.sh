@@ -39,7 +39,7 @@ function get_id () {
     echo `"$@" | awk '/ id / { print $4 }'`
 }
 
-
+if !$IS_KEYSTONE_CENTRAL; then
 # Tenants
 # -------
 SAVI_TENANT=$(get_id keystone tenant-create --name=savi)
@@ -92,6 +92,7 @@ MEMBER_ROLE=$(get_id keystone role-create --name=Member)
 keystone user-role-add --user_id $DEMO_USER --role_id $MEMBER_ROLE --tenant_id $DEMO_TENANT
 keystone user-role-add --user_id $DEMO_USER --role_id $MEMBER_ROLE --tenant_id $INVIS_TENANT
 
+fi
 
 # Services
 # --------
@@ -99,10 +100,10 @@ keystone user-role-add --user_id $DEMO_USER --role_id $MEMBER_ROLE --tenant_id $
 if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
 	CHEETAH_SERVICE=$(get_id cheetah service-create \
 		--name=cheetah \
-		--type=identity \
+		--type=control \
 		--description="Cheetah Control Service")
 	keystone endpoint-create \
-	    --region RegionOne \
+	    --region $REGION_NAME \
 		--service_id $CHEETAH_SERVICE \
 		--publicurl "http://$SERVICE_HOST:9090/v2.0" \
 		--adminurl "http://$SERVICE_HOST:9090/v2.0" \
@@ -116,7 +117,7 @@ if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
 		--type=identity \
 		--description="Keystone Identity Service")
 	keystone endpoint-create \
-	    --region RegionOne \
+	    --region $REGION_NAME \
 		--service_id $KEYSTONE_SERVICE \
 		--publicurl "http://$SERVICE_HOST:\$(public_port)s/v2.0" \
 		--adminurl "http://$SERVICE_HOST:\$(admin_port)s/v2.0" \
@@ -140,7 +141,7 @@ if [[ "$ENABLED_SERVICES" =~ "n-cpu" ]]; then
             --type=compute \
             --description="Nova Compute Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $NOVA_SERVICE \
             --publicurl "http://$SERVICE_HOST:\$(compute_port)s/v1.1/\$(tenant_id)s" \
             --adminurl "http://$SERVICE_HOST:\$(compute_port)s/v1.1/\$(tenant_id)s" \
@@ -166,7 +167,7 @@ if [[ "$ENABLED_SERVICES" =~ "n-vol" ]]; then
             --type=volume \
             --description="Volume Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $VOLUME_SERVICE \
             --publicurl "http://$SERVICE_HOST:8776/v1/\$(tenant_id)s" \
             --adminurl "http://$SERVICE_HOST:8776/v1/\$(tenant_id)s" \
@@ -191,7 +192,7 @@ if [[ "$ENABLED_SERVICES" =~ "g-api" ]]; then
             --type=image \
             --description="Glance Image Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $GLANCE_SERVICE \
             --publicurl "http://$SERVICE_HOST:9292/v1" \
             --adminurl "http://$SERVICE_HOST:9292/v1" \
@@ -216,7 +217,7 @@ if [[ "$ENABLED_SERVICES" =~ "swift" ]]; then
             --type="object-store" \
             --description="Swift Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $SWIFT_SERVICE \
             --publicurl "http://$SERVICE_HOST:8080/v1/AUTH_\$(tenant_id)s" \
             --adminurl "http://$SERVICE_HOST:8080/v1" \
@@ -240,7 +241,7 @@ if [[ "$ENABLED_SERVICES" =~ "q-svc" ]]; then
             --type=network \
             --description="Quantum Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $QUANTUM_SERVICE \
             --publicurl "http://$SERVICE_HOST:9696/" \
             --adminurl "http://$SERVICE_HOST:9696/" \
@@ -256,7 +257,7 @@ if [[ "$ENABLED_SERVICES" =~ "n-api" ]]; then
             --type=ec2 \
             --description="EC2 Compatibility Layer")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $EC2_SERVICE \
             --publicurl "http://$SERVICE_HOST:8773/services/Cloud" \
             --adminurl "http://$SERVICE_HOST:8773/services/Admin" \
@@ -272,7 +273,7 @@ if [[ "$ENABLED_SERVICES" =~ "n-obj" || "$ENABLED_SERVICES" =~ "swift" ]]; then
             --type=s3 \
             --description="S3")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $S3_SERVICE \
             --publicurl "http://$SERVICE_HOST:$S3_SERVICE_PORT" \
             --adminurl "http://$SERVICE_HOST:$S3_SERVICE_PORT" \
@@ -309,7 +310,7 @@ if [[ "$ENABLED_SERVICES" =~ "c-api" ]]; then
             --type=volume \
             --description="Cinder Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $CINDER_SERVICE \
             --publicurl "http://$SERVICE_HOST:8776/v1/\$(tenant_id)s" \
             --adminurl "http://$SERVICE_HOST:8776/v1/\$(tenant_id)s" \

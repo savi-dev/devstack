@@ -534,14 +534,6 @@ read_password ADMIN_PASSWORD "ENTER A PASSWORD TO USE FOR HORIZON AND KEYSTONE (
 # Set the tenant for service accounts in Keystone
 SERVICE_TENANT_NAME=${SERVICE_TENANT_NAME:-service}
 
-while true; do
-    read -p "Do you wish to install this program?" yn
-    case $yn in
-        [Yy]* ) read -p "Please Enter Central Keystone IP address or hostname?" $KEYSTONE_AUTH_HOST; break;;
-        [Nn]* ) break;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
 
 # Set Keystone interface configuration
 KEYSTONE_API_PORT=${KEYSTONE_API_PORT:-5000}

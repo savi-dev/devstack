@@ -57,6 +57,17 @@ done
 echo "Please enter a password (this is going to be used for all services):"
 read PASSWORD
 
+IS_KEYSTONE_CENTRAL=false
+REGION_NAME=$SERVICE_HOST
+while true; do
+    read -p "Do you want to install Keystone?" yn
+    case $yn in
+        [Nn]* ) read -p "Please Enter Central Keystone IP address or hostname?" $KEYSTONE_AUTH_HOST; read -p "Please Enter Region name?" REGION_NAME;IS_KEYSTONE_CENTRAL=true; break;;
+        [Yy]* ) break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
 echo "Which interface should be used for host (ie, "$(interfaces)")?"
 read HOST_INT
 
@@ -118,7 +129,7 @@ if [[ $AGENT == 0 ]]; then
   echo "Which interface should be used for public connnections [$HOST_INT]?"
   read PUBLIC_INT_READ
 
-  if [ $PUBLIC_INT_READ ]; then 
+  if [ $PUBLIC_INT_READ ]; then
 
     if ! interface_exists $PUBLIC_INT_READ; then
 
