@@ -531,15 +531,17 @@ read_password SERVICE_PASSWORD "ENTER A SERVICE_PASSWORD TO USE FOR THE SERVICE 
 # Horizon currently truncates usernames and passwords at 20 characters
 read_password ADMIN_PASSWORD "ENTER A PASSWORD TO USE FOR HORIZON AND KEYSTONE (20 CHARS OR LESS)."
 
+
 # Set the tenant for service accounts in Keystone
 SERVICE_TENANT_NAME=${SERVICE_TENANT_NAME:-service}
+
 
 # Set Keystone interface configuration
 KEYSTONE_API_PORT=${KEYSTONE_API_PORT:-5000}
 KEYSTONE_AUTH_HOST=${KEYSTONE_AUTH_HOST:-$SERVICE_HOST}
 KEYSTONE_AUTH_PORT=${KEYSTONE_AUTH_PORT:-35357}
 KEYSTONE_AUTH_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
-KEYSTONE_SERVICE_HOST=${KEYSTONE_SERVICE_HOST:-$SERVICE_HOST}
+KEYSTONE_SERVICE_HOST=${KEYSTONE_AUTH_HOST:-$SERVICE_HOST}
 KEYSTONE_SERVICE_PORT=${KEYSTONE_SERVICE_PORT:-5000}
 KEYSTONE_SERVICE_PROTOCOL=${KEYSTONE_SERVICE_PROTOCOL:-http}
 
@@ -1819,7 +1821,7 @@ EOF
    cd WebOb-1.1.1
    sudo python setup.py install
    cd ..
-   
+
    swift-init all restart || true
    swift-init proxy stop || true
 
@@ -2136,7 +2138,7 @@ if is_service_enabled key; then
     " -i $KEYSTONE_CONF
     # Append the S3 bits
     iniset $KEYSTONE_CONF filter:s3_extension paste.filter_factory "keystone.contrib.s3:S3Extension.factory"
-
+    KEYSTONE_CATALOG_BACKEND="sql"
     if [[ "$KEYSTONE_CATALOG_BACKEND" = "sql" ]]; then
         # Configure keystone.conf to use sql
         iniset $KEYSTONE_CONF catalog driver keystone.catalog.backends.sql.Catalog
@@ -2185,22 +2187,23 @@ if is_service_enabled key; then
     $KEYSTONE_DIR/bin/keystone-manage db_sync
     # set up certificates
     $KEYSTONE_DIR/bin/keystone-manage pki_setup
-
+    echo "The status of Keystone is $KEYSTONE_TYPE"
     # launch keystone and wait for it to answer before continuing
-    screen_it key "cd $KEYSTONE_DIR && $KEYSTONE_DIR/bin/keystone-all --config-file $KEYSTONE_CONF $KEYSTONE_LOG_CONFIG -d --debug"
-    echo "Waiting for keystone to start..."
-    if ! timeout $SERVICE_TIMEOUT sh -c "while ! http_proxy= curl -s $KEYSTONE_AUTH_PROTOCOL://$SERVICE_HOST:$KEYSTONE_API_PORT/v2.0/ >/dev/null; do sleep 1; done"; then
-      echo "keystone did not start"
-      exit 1
+    if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
+       screen_it key "cd $KEYSTONE_DIR && $KEYSTONE_DIR/bin/keystone-all --config-file $KEYSTONE_CONF $KEYSTONE_LOG_CONFIG -d --debug"
+       echo "Waiting for keystone to start..."
+       if ! timeout $SERVICE_TIMEOUT sh -c "while ! http_proxy= curl -s $KEYSTONE_AUTH_PROTOCOL://$SERVICE_HOST:$KEYSTONE_API_PORT/v2.0/ >/dev/null; do sleep 1; done"; then
+         echo "keystone did not start"
+         exit 1
+       fi
     fi
-
     # keystone_data.sh creates services, admin and demo users, and roles.
     SERVICE_ENDPOINT=$KEYSTONE_AUTH_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_AUTH_PORT/v2.0
 
     ADMIN_PASSWORD=$ADMIN_PASSWORD SERVICE_TENANT_NAME=$SERVICE_TENANT_NAME SERVICE_PASSWORD=$SERVICE_PASSWORD \
     SERVICE_TOKEN=$SERVICE_TOKEN SERVICE_ENDPOINT=$SERVICE_ENDPOINT SERVICE_HOST=$SERVICE_HOST \
-    S3_SERVICE_PORT=$S3_SERVICE_PORT KEYSTONE_CATALOG_BACKEND=$KEYSTONE_CATALOG_BACKEND \
-    DEVSTACK_DIR=$TOP_DIR ENABLED_SERVICES=$ENABLED_SERVICES \
+    S3_SERVICE_PORT=$S3_SERVICE_PORT KEYSTONE_CATALOG_BACKEND=$KEYSTONE_CATALOG_BACKEND KEYSTONE_TYPE=$KEYSTONE_TYPE \
+    DEVSTACK_DIR=$TOP_DIR ENABLED_SERVICES=$ENABLED_SERVICES REGION_NAME=$REGION_NAME \
         bash -x $FILES/keystone_data.sh
 
     # Set up auth creds now that keystone is bootstrapped
