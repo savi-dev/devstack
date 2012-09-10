@@ -15,7 +15,7 @@ DEST=/opt/stack
 # ENABLED_SERVICES, for example in your localrc to install all defaults but not
 # cinder you would just need to set this :
 # ENABLED_SERVICES+=,-cinder
-ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,cinder,c-sch,c-api,c-vol,n-sch,n-novnc,n-xvnc,n-cauth,horizon,mysql,rabbit
+ENABLED_SERVICES=g-api,g-reg,n-api,n-crt,n-obj,n-cpu,n-net,cinder,c-sch,c-api,c-vol,n-sch,n-novnc,n-xvnc,n-cauth,horizon,mysql,rabbit
 
 # Set the default Nova APIs to enable
 NOVA_ENABLED_APIS=ec2,osapi_compute,osapi_volume,metadata
@@ -56,8 +56,8 @@ GLANCECLIENT_REPO=${GIT_BASE}/savi-dev/python-glanceclient
 GLANCECLIENT_BRANCH=master
 
 # unified auth system (manages accounts/tokens)
-KEYSTONE_REPO=${GIT_BASE}/savi-dev/keystone.git
-KEYSTONE_BRANCH=rbac-api
+KEYSTONE_REPO=https://github.com/openstack/keystone.git
+KEYSTONE_BRANCH=master
 
 # a websockets/html5 or flash powered VNC console for vm instances
 NOVNC_REPO=https://github.com/savi-dev/noVNC.git
@@ -76,8 +76,8 @@ OPENSTACKCLIENT_REPO=${GIT_BASE}/savi-dev/python-openstackclient.git
 OPENSTACKCLIENT_BRANCH=master
 
 # python keystone client library to nova that horizon uses
-KEYSTONECLIENT_REPO=${GIT_BASE}/savi-dev/python-keystoneclient
-KEYSTONECLIENT_BRANCH=rbac-api
+KEYSTONECLIENT_REPO=https://github.com/mfaraji/python-keystoneclient
+KEYSTONECLIENT_BRANCH=master
 
 # quantum service
 QUANTUM_REPO=${GIT_BASE}/savi-dev/quantum

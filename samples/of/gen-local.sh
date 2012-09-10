@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 # gen-local.sh generates localrc for devstack. It's an interactive script, and
 # supports the following options:
@@ -57,12 +57,14 @@ done
 echo "Please enter a password (this is going to be used for all services):"
 read PASSWORD
 
-IS_KEYSTONE_CENTRAL=false
-REGION_NAME=$SERVICE_HOST
+#IS_KEYSTONE_CENTRAL=false
+KEYSTONE_TYPE="LOCAL"
+REGION_NAME="CORE"
+KEYSTONE_AUTH_HOST=""
 while true; do
     read -p "Do you want to install Keystone?" yn
     case $yn in
-        [Nn]* ) read -p "Please Enter Central Keystone IP address or hostname?" $KEYSTONE_AUTH_HOST; read -p "Please Enter Region name?" REGION_NAME;IS_KEYSTONE_CENTRAL=true; break;;
+        [Nn]* ) read -p "Please Enter Central Keystone IP address?" KEYSTONE_AUTH_HOST; read -p "Please Enter Region name?" REGION_NAME;KEYSTONE_TYPE="CENTRAL";break;;
         [Yy]* ) break;;
         * ) echo "Please answer yes or no.";;
     esac
@@ -159,6 +161,8 @@ if [[ $AGENT == 0 ]]; then
   sed -i -e 's/\${Q_PLUGIN}/'$Q_PLUGIN'/g' localrc
   sed -i -e 's/\${RYU_HOST}/'$HOST_IP'/g' localrc
   sed -i -e 's/\${SWIFT_DISK_SIZE}/'$SWIFT_DISK_SIZE'/g' localrc
+  sed -i -e 's/\${KEYSTONE_TYPE}/'$KEYSTONE_TYPE'/g' localrc
+  sed -i -e 's/\${REGION_NAME}/'$REGION_NAME'/g' localrc
 
   echo "localrc generated for the controller node."
 else
@@ -179,9 +183,13 @@ else
   sed -i -e 's/\${PASSWORD}/'$PASSWORD'/g' localrc
   sed -i -e 's/\${Q_PLUGIN}/'$Q_PLUGIN'/g' localrc
   sed -i -e 's/\${RYU_HOST}/'$CTRL_IP'/g' localrc
+  sed -i -e 's/\${KEYSTONE_TYPE}/'$KEYSTONE_TYPE'/g' localrc
+  sed -i -e 's/\${REGION_NAME}/'$REGION_NAME'/g' localrc
 
   echo "localrc generated for a compute node."
 fi
+
+  sed -i -e 's/\${KEYSTONE_AUTH_HOST}/'$KEYSTONE_AUTH_HOST'/g' localrc
 
 echo "Now run ./stack.sh"
 
