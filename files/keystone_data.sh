@@ -245,28 +245,28 @@ else
     CHEETAH_SERVICE = $(keystone service-id cheetah)
   fi
   if [[ "$ENABLED_SERVICES" =~ "n-cpu" ]]; then
-    NOVA_SERVICE = $(keystone service-id nova)
+    NOVA_SERVICE=$(keystone service-id nova)
   fi
   if [[ "$ENABLED_SERVICES" =~ "n-vol" ]]; then
-    VOLUME_SERVICE = $(keystone service-id volume)
+    VOLUME_SERVICE=$(keystone service-id volume)
   fi
   if [[ "$ENABLED_SERVICES" =~ "g-api" ]]; then
-    GLANCE_SERVICE = $(keystone service-id glance)
+    GLANCE_SERVICE=$(keystone service-id glance)
   fi
   if [[ "$ENABLED_SERVICES" =~ "swift" ]]; then
-    SWIFT_SERVICE = $(keystone service-id swift)
+    SWIFT_SERVICE=$(keystone service-id swift)
   fi
   if [[ "$ENABLED_SERVICES" =~ "q-svc" ]]; then
-    QUANTUM_SERVICE = $(keystone service-id quantum)
+    QUANTUM_SERVICE=$(keystone service-id quantum)
   fi
   if [[ "$ENABLED_SERVICES" =~ "n-api" ]]; then
-    EC2_SERVICE = $(keystone service-id ec2)
+    EC2_SERVICE=$(keystone service-id ec2)
   fi
   if [[ "$ENABLED_SERVICES" =~ "n-obj" || "$ENABLED_SERVICES" =~ "swift" ]]; then
-    S3_SERVICE = $(keystone service-id s3)
+    S3_SERVICE=$(keystone service-id s3)
   fi
   if [[ "$ENABLED_SERVICES" =~ "c-api" ]]; then
-    CINDER_SERVICE = $(keystone service-id cinder)
+    CINDER_SERVICE=$(keystone service-id cinder)
   fi
 fi
 
@@ -393,3 +393,6 @@ if [[ "$ENABLED_SERVICES" =~ "c-api" ]]; then
             --internalurl "http://$SERVICE_HOST:8776/v1/\$(tenant_id)s"
     fi
 fi
+
+
+env |grep --perl "^OS|^SERV"

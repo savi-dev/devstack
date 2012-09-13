@@ -2304,7 +2304,9 @@ is_service_enabled swift3 || \
 if is_service_enabled g-reg; then
     # Create a directory for the downloaded image tarballs.
     mkdir -p $FILES/images
-
+    unset SERVICE_ENDPOINT
+    unset SERVICE_TOKEN
+    env |grep --perl "^OS|^SER"
     TOKEN=$(keystone  token-get | grep ' id ' | get_field 2)
 
     # Option to upload legacy ami-tty, which works with xenserver
