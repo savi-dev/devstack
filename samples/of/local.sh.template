@@ -1,0 +1,13 @@
+
+
+if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
+   local_settings=$HORIZON_DIR/openstack_dashboard/local/local_settings.py
+   IFS=","
+   sudo sh -c "echo \"AVAILABLE_REGIONS = [\" >> $local_settings"
+   for region in $REGIONS
+   do
+     sudo sh -c "echo \"     ('$SERVICE_ENDPOINT', '$region'),\" >> $local_settings"
+   done
+   sudo sh -c "echo \" ]\" >> $local_settings"
+   sudo service apache2 restart
+fi

@@ -4,6 +4,7 @@
 # supports the following options:
 #   -a) Creates loclrc for compute nodes.
 
+ENABLED_SERVICES_CONTROL="key,n-api,n-crt,n-obj,n-cpu,n-net,n-vol,n-sch,n-novnc,n-xvnc,n-cauth,mysql,rabbit,quantum,q-svc,q-agt"
 set -e
 
 function interfaces {
@@ -22,7 +23,7 @@ function ip_address {
 
 function sanity_check {
   if [ ! -f $PWD/stack.sh ]; then
-    echo "Run this script from devstack's root: sample/of/local.sh"
+    echo "Run this script from devstack's root: sample/of/gen-local.sh"
     exit 1
   fi
 
@@ -111,7 +112,18 @@ if [[ $AGENT == 0 ]]; then
         * ) echo "Please answer yes or no.";;
     esac
   done
-
+  REGIONS=""
+  if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
+   read -p "Please Enter the region of this node[$REGION_NAME]:" reg
+   if [[ -z "${reg}" ]]; then
+      echo "The current region is $REGION_NAME"
+   else
+      REGION_NAME=$reg
+   fi
+   ENABLED_SERVICES_CONTROL+=",horizon"
+   read -p "Please Enter the rest of regions in comma separated format: " regs
+   REGIONS=$REGION_NAME","$regs
+  fi
   echo ""
 
   SWIFT_DISK_SIZE=5000000
@@ -139,7 +151,7 @@ if [[ $AGENT == 0 ]]; then
   else
     GLANCE_REGISTRY_ENABLED=true
     GLANCE_API_ENABLED=true
-  fi  
+  fi
 
   if [[ "$GLANCE_REGISTRY_ENABLED" == "true" ]]; then
     GLANCE_REGISTRY_AUTH_HOST=$KEYSTONE_AUTH_HOST
@@ -257,7 +269,7 @@ if [[ $AGENT == 0 ]]; then
   else
     sed -i -e 's/RYU_ENABLED_/#/g' localrc
   fi
-  
+
   if [[ $GLANCE_REGISTRY_ENABLED == "true" ]]; then
     sed -i -e 's/GLANCE_REGISTRY_ENABLED_//g' localrc
     if [[ $GLANCE_REGISTRY_AUTH_HOST ]]; then
@@ -282,7 +294,7 @@ if [[ $AGENT == 0 ]]; then
     sed -i -e 's/\${GLANCE_API_FLAVOR}/'$GLANCE_API_FLAVOR'/g' localrc
     sed -i -e 's/\${GLANCE_CACHE_PRUNER_INTERVAL}/'$GLANCE_CACHE_PRUNER_INTERVAL'/g' localrc
     sed -i -e 's/\${GLANCE_CACHE_CLEANER_INTERVAL}/'$GLANCE_CACHE_CLEANER_INTERVAL'/g' localrc
-    if [[ $GLANCE_API_AUTH_HOST ]]; then 
+    if [[ $GLANCE_API_AUTH_HOST ]]; then
       sed -i -e 's/\${GLANCE_API_AUTH_HOST}/'$GLANCE_API_AUTH_HOST'/g' localrc
     else
       sed -i 's/GLANCE_API_AUTH_HOST=\${GLANCE_API_AUTH_HOST}//g' localrc
@@ -296,7 +308,7 @@ if [[ $AGENT == 0 ]]; then
     sed -i -e 's/GLANCE_API_ENABLED_/*/g' localrc
   fi
 
-
+sed -i -e 's/\${ENABLED_SERVICES}/'$ENABLED_SERVICES_CONTROL'/g' localrc
   sed -i -e 's/\${HOST_IP_IFACE}/'$HOST_INT'/g' localrc
   sed -i -e 's/\${FLAT_INTERFACE}/'$FLAT_INT'/g' localrc
   sed -i -e 's/\${PUBLIC_INTERFACE}/'$PUBLIC_INT'/g' localrc
@@ -307,7 +319,7 @@ if [[ $AGENT == 0 ]]; then
   sed -i -e 's/\${Q_PLUGIN}/'$Q_PLUGIN'/g' localrc
   sed -i -e 's/\${RYU_HOST}/'$HOST_IP'/g' localrc
   sed -i -e 's/\${SWIFT_DISK_SIZE}/'$SWIFT_DISK_SIZE'/g' localrc
-
+sed -i -e 's/\${REGIONS}/'$REGIONS'/g' localrc
   if [ $DEF_IMAGE == "n" ]; then
     echo "IMAGE_URLS=" >> localrc
   fi
@@ -337,4 +349,5 @@ fi
  sed -i -e 's/\${KEYSTONE_TYPE}/'$KEYSTONE_TYPE'/g' localrc
  sed -i -e 's/\${REGION_NAME}/'$REGION_NAME'/g' localrc
  sed -i -e 's/\${KEYSTONE_AUTH_HOST}/'$KEYSTONE_AUTH_HOST'/g' localrc
+ cp $OF_DIR/local.sh.template local.sh
 echo "Now run ./stack.sh"

@@ -20,7 +20,6 @@
 
 # Keep track of the devstack directory
 TOP_DIR=$(cd $(dirname "$0") && pwd)
-
 # Import common functions
 source $TOP_DIR/functions
 
@@ -2249,7 +2248,9 @@ fi
 # Run ``local.sh`` if it exists to perform user-managed tasks
 if [[ -x $TOP_DIR/local.sh ]]; then
     echo "Running user script $TOP_DIR/local.sh"
-    $TOP_DIR/local.sh
+    SERVICE_ENDPOINT=$KEYSTONE_AUTH_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_API_PORT/v2.0 \
+    HORIZON_DIR=$HORIZON_DIR REGIONS=$REGIONS KEYSTONE_TYPE=$KEYSTONE_TYPE\
+    bash $TOP_DIR/local.sh
 fi
 
 
@@ -2274,7 +2275,7 @@ fi
 
 # If Keystone is present you can point ``nova`` cli to this server
 if is_service_enabled key; then
-    echo "Keystone is serving at $KEYSTONE_AUTH_PROTOCOL://$SERVICE_HOST:$KEYSTONE_API_PORT/v2.0/"
+    echo "Keystone is serving at $KEYSTONE_AUTH_PROTOCOL://$KEYSTONE_SERVICE_HOST:$KEYSTONE_API_PORT/v2.0/"
     echo "Examples on using novaclient command line is in exercise.sh"
     echo "The default users are: admin and demo"
     echo "The password: $ADMIN_PASSWORD"
