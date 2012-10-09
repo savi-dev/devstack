@@ -6,3 +6,6 @@ src
 localrc
 local.sh
 .project
+files/images
+cirros-0.3.0-x86_64-uec.tar.gz
+stack-screenrc
