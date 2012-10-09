@@ -9,6 +9,9 @@
 
 # NOTE: support for the old NOVA_* novaclient environment variables has
 # been removed.
+if [[ $# -eq 0 || $# -gt 4 || $# -lt 4 ]]; then
+  echo "source openrc [USER] [TENANT] [REGION] [AUTH_HOST]"
+fi
 
 if [[ -n "$1" ]]; then
     OS_USERNAME=$1
