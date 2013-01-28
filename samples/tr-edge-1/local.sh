@@ -38,6 +38,9 @@ $NOVA_BIN_DIR/nova-manage instance_type set_key --name=netfpga.1g --key cpu_arch
 $NOVA_BIN_DIR/nova-manage instance_type create --name=baremetal32.minimum --cpu=1 --memory=1 --root_gb=30 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=baremetal32.minimum --key cpu_arch --value i686
 
+$NOVA_BIN_DIR/nova-manage instance_type create --name=bee2 --cpu=1 --memory=1 --root_gb=40 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1
+$NOVA_BIN_DIR/nova-manage instance_type set_key --name=bee2 --key cpu_arch --value bee2_board
+
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=m1.tiny --key cpu_arch --value virtual
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=m1.small --key cpu_arch --value virtual
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=m1.medium --key cpu_arch --value virtual
@@ -173,6 +176,21 @@ sudo cp -p /etc/nova/* $BM_CONF -rf
 
 inicomment $BM_CONF/nova.conf DEFAULT firewall_driver
 
+OWNER=`whoami`
+BEE2_CONF=/etc/nova-bee2
+
+if [ -d "$BEE2_CONF" ]; then
+ echo "nova-bee2 conf dir exist"
+ sudo rm "$BEE2_CONF" -rf
+fi
+
+sudo mkdir $BEE2_CONF
+sudo chown $OWNER:root $BEE2_CONF -R
+
+sudo cp -p /etc/nova/* $BEE2_CONF -rf
+
+inicomment $BEE2_CONF/nova.conf DEFAULT firewall_driver
+
 function iso() {
     iniset /etc/nova/nova.conf DEFAULT "$1" "$2"
 }
@@ -181,16 +199,28 @@ function is() {
     iniset $BM_CONF/nova.conf DEFAULT "$1" "$2"
 }
 
+function isb() {
+    iniset $BEE2_CONF/nova.conf DEFAULT "$1" "$2"
+}
+
 BMC_HOST=`hostname -f`
 BMC_HOST=bmc-$BMC_HOST
 
+BEE2_HOST=`hostname -f`
+BEE2_HOST=bee2-$BEE2_HOST
+
 is baremetal_sql_connection mysql://$MYSQL_USER:$MYSQL_PASSWORD@127.0.0.1/nova_bm
+isb baremetal_sql_connection mysql://$MYSQL_USER:$MYSQL_PASSWORD@127.0.0.1/nova_bm
 is compute_driver nova.virt.baremetal.driver.BareMetalDriver
+isb compute_driver nova.virt.baremetal.driver.BareMetalDriver
 is baremetal_driver nova.virt.baremetal.pxe.PXE
+isb baremetal_driver nova.virt.bee2.bee2-board.BEE2
+isb power_manager nova.virt.bee2.ipmi-fake.Ipmi
 #is power_manager nova.virt.baremetal.ipmi-fake.Ipmi
 #comment the above line and uncomment the next line if you want to use netbooter
 is power_manager nova.virt.baremetal.snmp.SnmpNetBoot
 is instance_type_extra_specs cpu_arch:nf_x86_64
+isb instance_type_extra_specs cpu_arch:bee2_board
 is baremetal_tftp_root $TFTPROOT
 #is baremetal_term /usr/local/bin/shellinaboxd
 is baremetal_deploy_kernel $KERNEL_ID
@@ -202,6 +232,7 @@ is baremetal_pxe_parent_interface $BM_PXE_INTERFACE
 is firewall_driver ""
 is baremetal_vif_driver nova.virt.baremetal.ryu.ryu_vif_driver.RyuVIFDriver
 is host $BMC_HOST
+isb host $BEE2_HOST
 iso host `hostname -f`
 
 mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e 'DROP DATABASE IF EXISTS nova_bm;'
@@ -215,6 +246,10 @@ $NOVA_BIN_DIR/nova-bm-manage --config-dir=$BM_CONF pxe_ip create --cidr 10.10.41
 
 if [ -f $TOP_DIR/bm-nodes.sh ]; then
     . $TOP_DIR/bm-nodes.sh
+fi
+
+if [ -f ./bee2-nodes.sh ]; then
+    . ./bee2-nodes.sh
 fi
 
 NL=`echo -ne '\015'`
@@ -243,6 +278,12 @@ screen -S stack -p n-cpu-bm -X kill
 screen -S stack -X screen -t n-cpu-bm
 sleep 1.5
 screen -S stack -p n-cpu-bm -X stuff "cd $NOVA_DIR && sg libvirtd \"$NOVA_BIN_DIR/nova-compute --config-dir=$BM_CONF\" $NL"
+
+echo "starting bee2Board nova-compute"
+screen -S stack -p n-cpu-bee2 -X kill
+screen -S stack -X screen -t n-cpu-bee2
+sleep 1.5
+screen -S stack -p n-cpu-bee2 -X stuff "cd $NOVA_DIR && sg libvirtd \"$NOVA_BIN_DIR/nova-compute --config-dir=$BEE2_CONF\" $NL"
 
 if [[ $PUBLIC_INTERFACE != "" ]]; then
   TEMP_BR=`sudo ovs-vsctl port-to-br $PUBLIC_INTERFACE`
