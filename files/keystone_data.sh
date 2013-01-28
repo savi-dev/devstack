@@ -419,3 +419,5 @@ if [[ "$ENABLED_SERVICES" =~ "c-api" ]]; then
     fi
 fi
 
+ls
+
