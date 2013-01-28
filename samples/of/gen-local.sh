@@ -45,6 +45,14 @@ OF_DIR=`dirname $0`
 
 AGENT=0
 
+if [[ -f localrc ]]; then
+  echo "localrc already exists. Overwrite? ([y]/n)"
+  read OVERWRITE_LOCALRC
+  if [[ "$OVERWRITE_LOCALRC" == "n" || "$OVERWRITE_LOCALRC" == "N" ]]; then
+    exit 1
+  fi
+fi
+
 while getopts ":a" opt; do
   case $opt in
     a)
@@ -245,18 +253,42 @@ if [[ $AGENT == 0 ]]; then
   fi
 fi
 
-echo "Would you like to use OpenFlow? ([n]/y)"
-read USE_OF
+read -p "Would you like to use OpenFlow? ([n]/y) " USE_OF
 
 Q_PLUGIN=openvswitch
 if [[ "$USE_OF" == "y" || "$USE_OF" == "Y" ]]; then
   echo "This version supports only Ryu."
   echo ''
   Q_PLUGIN=ryu
-  
-  if [[ $AGENT == 0 ]]; then
-    read -p "Do you want to install FlowVisor? ([n]/y)" FV_ENABLED
+
+  read -p "What port is the OpenFlow controller listening on? [6634] " OF_PORT
+  if [ ! $OF_PORT ]; then
+    OF_PORT=6634
   fi
+  echo ''
+
+  if [[ $AGENT == 0 ]]; then
+    read -p "Do you want to install FlowVisor? ([n]/y) " FV_ENABLED
+    if [[ "$FV_ENABLED" == "y" || "$FV_ENABLED" == "Y" ]]; then
+      read -p "What port is FlowVisor listening on? [6633] " FV_PORT
+      if [ ! $FV_PORT ]; then
+        FV_PORT=6633
+      fi
+
+      while [[ "$OF_PORT" == "$FV_PORT" ]]; do
+        read -p "FlowVisor port conflict with OpenFlow controller port. Choose another. " FV_PORT
+      done
+    fi
+  else
+    read -p "Is FlowVisor in use on the controller node? ([n]/y)" FV_ENABLED
+    if [[ "$FV_ENABLED" == "y" || "$FV_ENABLED" == "Y" ]]; then
+      read -p "What port is FlowVisor listening on? [6633] " OF_PORT
+      if [ ! $OF_PORT ]; then
+        OF_PORT=6633
+      fi
+    fi
+  fi
+  echo ''
 fi
 
 if [[ $AGENT == 0 ]]; then
@@ -346,12 +378,21 @@ if [[ $AGENT == 0 ]]; then
   sed -i -e 's/\${PASSWORD}/'$PASSWORD'/g' localrc
   sed -i -e 's/\${Q_PLUGIN}/'$Q_PLUGIN'/g' localrc
   sed -i -e 's/\${RYU_HOST}/'$HOST_IP'/g' localrc
+  sed -i -e 's/\${RYU_PORT}/'$OF_PORT'/g' localrc
+  sed -i -e 's/\${FV_PORT}/'$FV_PORT'/g' localrc
   sed -i -e 's/\${SWIFT_DISK_SIZE}/'$SWIFT_DISK_SIZE'/g' localrc
   sed -i -e 's/\${REGIONS}/'$REGIONS'/g' localrc
   if [ $DEF_IMAGE == "n" ]; then
     echo "IMAGE_URLS=" >> localrc
   fi
 
+  if [[ -f local.sh ]]; then
+    read -p "local.sh already exists. Overwrite? ([y]/n) " OVERWRITE_LOCAL_SH
+    if [[ "$OVERWRITE_LOCAL_SH" == "n" || "$OVERWRITE_LOCAL_SH" == "N" ]]; then
+      echo "localrc generated for the controller node."
+      exit 1
+    fi
+  fi
   cp $OF_DIR/local.sh.template local.sh
 
   echo "localrc generated for the controller node."
@@ -373,6 +414,7 @@ else
   sed -i -e 's/\${PASSWORD}/'$PASSWORD'/g' localrc
   sed -i -e 's/\${Q_PLUGIN}/'$Q_PLUGIN'/g' localrc
   sed -i -e 's/\${RYU_HOST}/'$CTRL_IP'/g' localrc
+  sed -i -e 's/\${RYU_PORT}/'$OF_PORT'/g' localrc
 
   echo "localrc generated for a compute node."
 fi

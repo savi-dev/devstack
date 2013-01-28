@@ -4,7 +4,8 @@ TOP_DIR=$(cd $(dirname "$0") && pwd)
 source $TOP_DIR/stackrc
 source $TOP_DIR/functions
 DEST=${DEST:-/opt/stack}
-source $TOP_DIR/openrc admin admin $OS_REGION_NAME $KEYSTONE_AUTH_HOST
+IMG_DIR=${IMG_DIR:-/mnt/volume/image_dir}
+source $TOP_DIR/openrc admin admin CORE $KEYSTONE_AUTH_HOST
 
 NOVA_DIR=$DEST/nova
 if [ -d $NOVA_DIR/bin ] ; then
@@ -17,28 +18,21 @@ MYSQL_USER=${MYSQL_USER:-root}
 BM_PXE_INTERFACE=${BM_PXE_INTERFACE:-eth1}
 BM_PXE_PER_NODE=`trueorfalse False $BM_PXE_PER_NODE`
 
-$NOVA_BIN_DIR/nova-manage instance_type create --name=baremetal.small --cpu=2 --memory=2048 --root_gb=40 --ephemeral_gb=20 --swap=2048 --rxtx_factor=1
+$NOVA_BIN_DIR/nova-manage instance_type create --name=baremetal.small --cpu=2 --memory=2048 --root_gb=40 --ephemeral_gb=20 --swap=2048 --rxtx_factor=1 --flavor=6
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=baremetal.small --key cpu_arch --value x86_64
-
-$NOVA_BIN_DIR/nova-manage instance_type create --name=baremetal.medium --cpu=1 --memory=4096 --root_gb=40 --ephemeral_gb=20 --swap=2048 --rxtx_factor=1
+$NOVA_BIN_DIR/nova-manage instance_type create --name=baremetal.medium --cpu=1 --memory=4096 --root_gb=40 --ephemeral_gb=20 --swap=2048 --rxtx_factor=1 --flavor=7
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=baremetal.medium --key cpu_arch --value x86_64
-
-$NOVA_BIN_DIR/nova-manage instance_type create --name=baremetal.minimum --cpu=1 --memory=1 --root_gb=40 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1
+$NOVA_BIN_DIR/nova-manage instance_type create --name=baremetal.minimum --cpu=1 --memory=1 --root_gb=40 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1 --flavor=8
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=baremetal.minimum --key cpu_arch --value x86_64
-
-$NOVA_BIN_DIR/nova-manage instance_type create --name=gpu --cpu=1 --memory=1 --root_gb=100 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1
+$NOVA_BIN_DIR/nova-manage instance_type create --name=gpu --cpu=1 --memory=1 --root_gb=100 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1 --flavor=9
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=gpu --key cpu_arch --value gpu_x86_64
-
-$NOVA_BIN_DIR/nova-manage instance_type create --name=netfpga.10g --cpu=1 --memory=1 --root_gb=40 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1
+$NOVA_BIN_DIR/nova-manage instance_type create --name=netfpga.10g --cpu=1 --memory=1 --root_gb=40 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1 --flavor=10
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=netfpga.10g --key cpu_arch --value nf2_x86_64
-
-$NOVA_BIN_DIR/nova-manage instance_type create --name=netfpga.1g --cpu=1 --memory=1 --root_gb=40 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1
+$NOVA_BIN_DIR/nova-manage instance_type create --name=netfpga.1g --cpu=1 --memory=1 --root_gb=40 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1 --flavor=11
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=netfpga.1g --key cpu_arch --value nf1_i686
-
-$NOVA_BIN_DIR/nova-manage instance_type create --name=baremetal32.minimum --cpu=1 --memory=1 --root_gb=30 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1
+$NOVA_BIN_DIR/nova-manage instance_type create --name=baremetal32.minimum --cpu=1 --memory=1 --root_gb=30 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1 --flavor=12
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=baremetal32.minimum --key cpu_arch --value i686
-
-$NOVA_BIN_DIR/nova-manage instance_type create --name=bee2 --cpu=1 --memory=1 --root_gb=40 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1
+$NOVA_BIN_DIR/nova-manage instance_type create --name=bee2 --cpu=1 --memory=1 --root_gb=40 --ephemeral_gb=0 --swap=2048 --rxtx_factor=1 --flavor=13
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=bee2 --key cpu_arch --value bee2_board
 
 $NOVA_BIN_DIR/nova-manage instance_type set_key --name=m1.tiny --key cpu_arch --value virtual
@@ -90,7 +84,7 @@ RAMDISK_ID=$(glance image-create --name "baremetal-deployment-ramdisk" --public 
 echo "$RAMDISK_ID"
 
 echo "building ubuntu image"
-IMG=$DEST/ubuntu.img
+IMG=$IMG_DIR/ubuntu.img
 
 ./build-ubuntu-image.sh "$IMG" "$DEST"
 
@@ -110,7 +104,7 @@ if [[ $IMAGE_ID_OLD = "" ]]; then
    glance image-create --name "Ubuntu64" --public --container-format bare --disk-format raw --property kernel_id=$REAL_KERNEL_ID --property ramdisk_id=$REAL_RAMDISK_ID < "$IMG"
 fi
 
-IMG=$DEST/UbuntuNF2.img
+IMG=$IMG_DIR/UbuntuNF2.img
 IMAGE_ID_OLD=$(glance image-list | grep UbuntuNF2)
 if [[ $IMAGE_ID_OLD = "" && -f "$IMG" ]]; then
    REAL_KERNEL_ID=$(glance image-list | grep "baremetal-64-real-kernel" | awk '{ print $2 }')
@@ -119,9 +113,18 @@ if [[ $IMAGE_ID_OLD = "" && -f "$IMG" ]]; then
    glance image-create --name "UbuntuNF2" --public --container-format bare --disk-format raw --property kernel_id=$REAL_KERNEL_ID --property ramdisk_id=$REAL_RAMDISK_ID < "$IMG"
 fi
 
+IMG=$IMG_DIR/cuda_ubuntu_12_04.img
+IMAGE_ID_OLD=$(glance image-list | grep UbuntuGPU)
+if [[ $IMAGE_ID_OLD = "" && -f "$IMG" ]]; then
+   REAL_KERNEL_ID=$(glance image-list | grep "baremetal-64-real-kernel" | awk '{ print $2 }')
+   REAL_RAMDISK_ID=$(glance image-list | grep "baremetal-64-real-ramdisk" | awk '{ print $2 }')
+   echo "Uploading GPU image"
+   glance image-create --name "UbuntuGPU" --public --container-format bare --disk-format raw --property kernel_id=$REAL_KERNEL_ID --property ramdisk_id=$REAL_RAMDISK_ID < "$IMG"
+fi
+
 KERNEL_32=~/kernel32
 RAMDISK_32=~/ramdisk32
-IMG_32=~/ubuntu32.img
+IMG_32=$IMG_DIR/ubuntu32.img
 
 IMAGE_ID_OLD=$(glance image-list | grep Ubuntu32)
 if [[ $IMAGE_ID_OLD = "" ]]; then 
@@ -302,6 +305,7 @@ fi
 echo "done baremetal local.sh"
 
 . $TOP_DIR/port_reg.sh
+. $TOP_DIR/port_bond.sh
 
     SERVICE_ENDPOINT=$KEYSTONE_AUTH_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_API_PORT/v2.0 \
     KEYSTONE_AUTH_HOST=$KEYSTONE_AUTH_HOST REGION_NAME=$REGION_NAME \
