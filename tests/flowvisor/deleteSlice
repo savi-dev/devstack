@@ -2,6 +2,7 @@
 # One argument expected:
 #    1: Name of the slice
 
+unset ERR
 if [[ -n "$1" ]]; then
     SLICE_NAME=$1
 else
@@ -11,5 +12,5 @@ fi
 
 if [[ -z "$ERR" ]]; then
     #curl http://$RYU_API_HOST:$RYU_API_PORT/v1.0/flowvisor/"$SLICE_NAME"_"$CTRL_IP_ADDR"_"$CTRL_PORT_NUM" -X POST
-    fvctl --url=https://localhost:8085 --passwd-file=/usr/etc/flowvisor/passFile deleteSlice $SLICE_NAME
+    fvctl -h 127.0.0.1 -p 8085 -f /etc/flowvisor/passFile remove-slice $SLICE_NAME
 fi

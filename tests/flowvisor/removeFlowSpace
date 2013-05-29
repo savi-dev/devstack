@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # One argument expected:
-#    1: Name of the slice
+#    1: Name of the FlowSpace
 
+unset ERR
 if [[ -n "$1" ]]; then
-    FS_ID=$1
+    FS_NAME=$1
 else
-    echo "Must specify first parameter (FlowSpace ID)"
+    echo "Must specify first parameter (FlowSpace name)"
     ERR=1
 fi
 
 if [[ -z "$ERR" ]]; then
     #curl http://$RYU_API_HOST:$RYU_API_PORT/v1.0/flowvisor/"$SLICE_NAME"_"$CTRL_IP_ADDR"_"$CTRL_PORT_NUM" -X POST
-    fvctl --url=https://localhost:8085 --passwd-file=/usr/etc/flowvisor/passFile removeFlowSpace $FS_ID
+    fvctl -h 127.0.0.1 -p 8085 -f /etc/flowvisor/passFile remove-flowspace $FS_NAME
 fi

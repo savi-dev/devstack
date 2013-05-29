@@ -354,30 +354,53 @@ RYU_OFP_HOST=${RYU_OFP_HOST:-127.0.0.1}
 # Ryu OFP Port
 RYU_OFP_PORT=${RYU_OFP_PORT:-6633}
 
+# Janus API Host
+JANUS_API_HOST=${JANUS_API_HOST:-127.0.0.1}
+JANUS_API_PORT=${JANUS_API_PORT:-8091}
+JANUS_PUB_API_PORT=${JANUS_PUB_API_PORT:-8081}
+
 if is_service_enabled fv; then
-    # Assuming FlowVisor installs to /etc/usr/flowvisor directory...
-    FV_DIR=/usr/etc/flowvisor
+    # Install FlowVisor if it hasn't been installed already
+    fv_installed=`sudo dpkg --list | grep flowvisor` || true
+
+    if [[ -z "$fv_installed" ]]; then
+        # Following instructions from https://github.com/OPENNETWORKINGLAB/flowvisor/wiki/Installation-from-Binary
+        echo "Installing FlowVisor, please wait..."
+        wget http://updates.onlab.us/GPG-KEY-ONLAB
+        sudo apt-key add GPG-KEY-ONLAB
+        sudo bash -c 'echo "deb http://updates.onlab.us/debian stable/" >> /etc/apt/sources.list'
+        sudo apt-get update
+        sudo apt-get -y --force-yes install flowvisor
+
+        # Generate database and configuration file
+        echo "Generating FlowVisor database and config file (one-time process)."
+        echo "Please press enter when prompted for the password"
+        sudo -u flowvisor fvconfig generate /etc/flowvisor/fv_config.json
+    fi
+
+    # Assuming FlowVisor installs to /etc/flowvisor directory...
+    FV_DIR=/etc/flowvisor
     if [[ ! -d $FV_DIR ]]; then
         sudo mkdir -p $FV_DIR
     fi
-    sudo chown `whoami` $FV_DIR
+    sudo chown flowvisor $FV_DIR
 
     if [[ -f $FV_DIR/fv_config.json ]]; then
-        mv $FV_DIR/fv_config.json $FV_DIR/fv_config.json.backup
+        sudo mv $FV_DIR/fv_config.json $FV_DIR/fv_config.json.backup
     fi
-    cp $TOP_DIR/samples/of/fv_config.json $FV_DIR/fv_config.json
-    sed -i -e 's/0\.0\.0\.0/'$RYU_OFP_HOST'/g' $FV_DIR/fv_config.json
-    sed -i -e 's/6634/'$RYU_OFP_PORT'/g' $FV_DIR/fv_config.json
+    sudo cp $TOP_DIR/samples/of/fv_config.json $FV_DIR/fv_config.json
+    sudo sed -i -e 's/0\.0\.0\.0/'$RYU_OFP_HOST'/g' $FV_DIR/fv_config.json
+    sudo sed -i -e 's/6634/'$RYU_OFP_PORT'/g' $FV_DIR/fv_config.json
 
     if [[ ! -f $FV_DIR/passFile ]]; then
-        touch $FV_DIR/passFile
-        echo '' > $FV_DIR/passFile
+        sudo touch $FV_DIR/passFile
+        sudo echo '' > $FV_DIR/passFile
         echo ''
     fi
 fi
 
 # FlowVisor Config File for Default Ryu Control
-RYU_FV_CONFIG=${RYU_FV_CONFIG:-/usr/etc/flowvisor/fv_config.json}
+RYU_FV_CONFIG=${RYU_FV_CONFIG:-/etc/flowvisor/fv_config.json}
 # FlowVisor Control Password File
 RYU_FV_PASSFILE=${RYU_FV_PASSFILE:-/usr/local/etc/flowvisor/passFile}
 # FlowVisor Non-Admin Slice Default Password
@@ -928,6 +951,12 @@ fi
 if is_service_enabled ceilometer; then
     install_ceilometer
 fi
+if is_service_enabled ryu; then
+    if is_service_enabled janus; then
+        RYU_BRANCH=ryu2janus
+    fi
+    git_clone $RYU_REPO $RYU_DIR $RYU_BRANCH
+fi
 if is_service_enabled whale; then
     install_whale
     install_whaleclient
@@ -1088,9 +1117,14 @@ default-storage-engine = InnoDB" $MY_CONF
 
     restart_service $MYSQL
 
-    if is_service_enabled ryu; then
-        mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "DROP DATABASE IF EXISTS ryu;"
-        mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "CREATE DATABASE IF NOT EXISTS ryu CHARACTER SET utf8;"
+    if is_service_enabled janus; then
+        mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "DROP DATABASE IF EXISTS janus;"
+        mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "CREATE DATABASE IF NOT EXISTS janus CHARACTER SET utf8;"
+    else
+        if is_service_enabled ryu; then
+            mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "DROP DATABASE IF EXISTS ryu;"
+            mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "CREATE DATABASE IF NOT EXISTS ryu CHARACTER SET utf8;"
+        fi
     fi
 fi
 
@@ -1447,7 +1481,12 @@ EOF
             # Start Janus first (otherwise Ryu may attempt to send RESTful calls to Janus prior to Janus being active)
             screen_it janus "cd $JANUS_DIR && $JANUS_DIR/bin/janus-init"
 
+            cat << EOF >> $RYU_CONF
+--janus_host=$JANUS_API_HOST
+--janus_port=$JANUS_API_PORT
+EOF
             screen_it ryu "cd $RYU_DIR && $RYU_DIR/bin/ryu-manager --flagfile $RYU_CONF --app_lists ryu.app.ofctl_rest,ryu.app.ryu2janus,ryu.app.discovery,ryu.app.rest_discovery"
+            #screen_it ryu "cd $RYU_DIR && $RYU_DIR/bin/ryu-manager --flagfile $RYU_CONF --app_lists ryu.app.ofctl_rest,ryu.app.ryu2janus"
             sleep 5
         else
             cat << EOF >> $RYU_CONF
@@ -2280,21 +2319,9 @@ if is_service_enabled g-api; then
     done
 fi
 
-# Start up FlowVisor
+# Start up FlowVisor and give it time to start up
 if is_service_enabled fv; then
-    # Install FlowVisor if it hasn't been installed already
-    fv_installed=`sudo dpkg --list | grep flowvisor` || true
-
-    if [[ -z "$fv_installed" ]]; then
-        echo "Installing FlowVisor, please wait..."
-        sudo bash -c 'echo "deb http://updates.flowvisor.org/openflow/downloads/GENI/DEB/old_repo unstable/binary-\$(ARCH)/" >> /etc/apt/sources.list'
-        #sudo bash -c 'echo "deb http://updates.onlab.us/debian stable contrib" >> /etc/apt/sources.list'
-        sudo apt-get update
-        sudo apt-get -y --force-yes install flowvisor
-    fi
-
-    # Start up FlowVisor and give it time to start up
-    screen_it fv "cd ~ && sudo flowvisor -l $RYU_FV_CONFIG"
+    screen_it fv "cd ~ && sudo -u flowvisor flowvisor -l $RYU_FV_CONFIG"
     sleep 3
 fi
 

@@ -1,48 +1,55 @@
 {
-   "flowvisor": [
-      {
-         "api_webserver_port": 8085,
-         "api_jetty_webserver_port": -1,
-         "checkpointing": false,
-         "listen_port": 6633,
-         "track_flows": false,
-         "stats_desc_hack": false,
-         "run_topology_server": false,
-         "logging": "NOTE",
-         "log_ident": "flowvisor",
-         "log_facility": "LOG_LOCAL7",
-         "version": "flowvisor-0.9",
-         "host": "localhost",
-         "default_flood_perm": "fvadmin",
-         "config_name": "default"
-      }
-   ],
-   "Slice": [
-      {
-         "config_name": "default",
-         "flowmap_type": "federated",
-         "name": "fvadmin",
-         "creator": "fvadmin",
-         "passwd_crypt": "fcfa0bdb70c6203f33f59867f069d08d",
-         "passwd_salt": "sillysalt",
-         "controller_hostname": "0.0.0.0",
-         "controller_port": 6634,
-         "contact_email": "fvadmin@localhost",
-         "drop_policy": "exact",
-         "lldp_spam": true
-      }
-   ],
-   "FlowSpaceRule": [
-      {
-         "dpid": "-8000000000000000",
-         "priority": 1,
-         "in_port": 0,
-         "wildcards": 4194303,
-         "slice_action": [
-            {
-               "fvadmin": 4
-            }
-         ]
-      }
-   ]
+  "switches": [],
+  "flowvisor": [
+    {
+      "api_webserver_port": -1,
+      "db_version": 2,
+      "host": "localhost",
+      "log_ident": "flowvisor",
+      "checkpointing": false,
+      "listen_port": 6633,
+      "logging": "NOTE",
+      "run_topology_server": false,
+      "log_facility": "LOG_LOCAL7",
+      "version": "flowvisor-1.0.1",
+      "config_name": "default",
+      "api_jetty_webserver_port": 8085,
+      "default_flood_perm": "fvadmin",
+      "track_flows": false,
+      "stats_desc_hack": false
+    }
+  ],
+  "FlowSpaceRule": [
+    {
+      "id": 1,
+      "forced_queue": -1,
+      "wildcards": 4194303,
+      "priority": 1,
+      "name": "defaultRule",
+      "queue_id": [],
+      "dpid": "all_dpids",
+      "slice_action": [
+        {
+          "fvadmin": 4
+        }
+      ]
+    }
+  ],
+  "Slice": [
+    {
+      "contact_email": "fvadmin@localhost",
+      "admin_status": true,
+      "creator": "fvadmin",
+      "passwd_salt": "-77322814",
+      "drop_policy": "exact",
+      "config_name": "default",
+      "max_flow_rules": -1,
+      "name": "fvadmin",
+      "controller_port": 6634,
+      "controller_hostname": "0.0.0.0",
+      "flowmap_type": "federated",
+      "passwd_crypt": "7cbea324049937733301326638d6f2c1",
+      "lldp_spam": true
+    }
+  ]
 }

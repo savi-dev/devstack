@@ -4,6 +4,7 @@
 #    2: IP address of the slice controller
 #    3: Port number of the slice controller
 
+unset ERR
 if [[ -n "$1" ]]; then
     SLICE_NAME=$1
 else
@@ -25,5 +26,5 @@ fi
 
 if [[ -z "$ERR" ]]; then
     #curl http://$RYU_API_HOST:$RYU_API_PORT/v1.0/flowvisor/"$SLICE_NAME"_"$CTRL_IP_ADDR"_"$CTRL_PORT_NUM" -X POST
-    fvctl --url=https://localhost:8085 --passwd-file=/usr/etc/flowvisor/passFile createSlice $SLICE_NAME tcp:$CTRL_IP_ADDR:$CTRL_PORT_NUM blek@blek.ca
+    fvctl -h 127.0.0.1 -p 8085 -f /etc/flowvisor/passFile add-slice $SLICE_NAME tcp:$CTRL_IP_ADDR:$CTRL_PORT_NUM blek@blek.ca
 fi

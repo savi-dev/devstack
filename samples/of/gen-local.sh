@@ -257,46 +257,54 @@ read -p "Would you like to use OpenFlow? ([n]/y) " USE_OF
 
 Q_PLUGIN=openvswitch
 if [[ "$USE_OF" == "y" || "$USE_OF" == "Y" ]]; then
-  echo "This version supports only Ryu."
-  echo ''
-  Q_PLUGIN=ryu
-
-  read -p "What port is the OpenFlow controller listening on? [6634] " OF_PORT
-  if [ ! $OF_PORT ]; then
-    OF_PORT=6634
-  fi
-  echo ''
-
-  if [[ $AGENT == 0 ]]; then
-    read -p "Do you want to install FlowVisor? ([n]/y) " FV_ENABLED
-    if [[ "$FV_ENABLED" == "y" || "$FV_ENABLED" == "Y" ]]; then
-      read -p "What port is FlowVisor listening on? [6633] " FV_PORT
-      if [ ! $FV_PORT ]; then
-        FV_PORT=6633
-      fi
-
-      while [[ "$OF_PORT" == "$FV_PORT" ]]; do
-        read -p "FlowVisor port conflict with OpenFlow controller port. Choose another. " FV_PORT
-      done
-    fi
-
+    echo "This version supports only Ryu."
     echo ''
-    read -p "Do you want to use SDI Manager? ([y]/n) " SDI_ENABLED
-    if [[ "$SDI_ENABLED" == "n" || "$SDI_ENABLED" == "N" ]]; then
-        USE_SDI=false
+    Q_PLUGIN=ryu
+
+    read -p "What port is the OpenFlow controller listening on? [6634] " OF_PORT
+    if [ ! $OF_PORT ]; then
+        OF_PORT=6634
+    fi
+    echo ''
+
+    if [[ $AGENT == 0 ]]; then
+        read -p "Do you want to install FlowVisor? ([n]/y) " FV_ENABLED
+        if [[ "$FV_ENABLED" == "y" || "$FV_ENABLED" == "Y" ]]; then
+            read -p "What port is FlowVisor listening on? [6633] " FV_PORT
+            if [ ! $FV_PORT ]; then
+                FV_PORT=6633
+            fi
+
+            while [[ "$OF_PORT" == "$FV_PORT" ]]; do
+                read -p "FlowVisor port conflict with OpenFlow controller port. Choose another. " FV_PORT
+            done
+        fi
+
+        echo ''
+        read -p "Do you want to use SDI Manager? ([y]/n) " SDI_ENABLED
+        if [[ "$SDI_ENABLED" == "n" || "$SDI_ENABLED" == "N" ]]; then
+            USE_SDI=false
+        else
+            USE_SDI=true
+        fi
     else
-        USE_SDI=true
+        read -p "Is FlowVisor in use on the controller node? ([n]/y)" FV_ENABLED
+        if [[ "$FV_ENABLED" == "y" || "$FV_ENABLED" == "Y" ]]; then
+            read -p "What port is FlowVisor listening on? [6633] " OF_PORT
+            if [ ! $OF_PORT ]; then
+                OF_PORT=6633
+            fi
+        fi
+        echo ''
+
+        read -p "Is the SDI Manager in use on the controller node? ([n]/y)" SDI_ENABLED
+        if [[ "$SDI_ENABLED" == "n" || "$SDI_ENABLED" == "N" ]]; then
+            USE_SDI=false
+        else
+            USE_SDI=true
+        fi
     fi
-  else
-    read -p "Is FlowVisor in use on the controller node? ([n]/y)" FV_ENABLED
-    if [[ "$FV_ENABLED" == "y" || "$FV_ENABLED" == "Y" ]]; then
-      read -p "What port is FlowVisor listening on? [6633] " OF_PORT
-      if [ ! $OF_PORT ]; then
-        OF_PORT=6633
-      fi
-    fi
-  fi
-  echo ''
+    echo ''
 fi
 
 if [[ $AGENT == 0 ]]; then
@@ -332,7 +340,7 @@ if [[ $AGENT == 0 ]]; then
     sed -i -e 's/6633/6634/g' localrc
 
     echo "Note: If you want to use the 'fvctl' CLI tool native to FlowVisor, it is recommended you add an alias to .bashrc:"
-    echo "    alias fvctl='fvctl --passwd-file=/usr/etc/flowvisor/passFile --url=https://localhost:8085'"
+    echo "    alias fvctl='fvctl -f /etc/flowvisor/passFile -h 127.0.0.1 -p 8085'"
   else
     sed -i -e 's/FV_ENABLED_/#/g' localrc
   fi
@@ -420,6 +428,12 @@ else
     sed -i -e 's/RYU_ENABLED_//g' localrc
   else
     sed -i -e 's/RYU_ENABLED_/#/g' localrc
+  fi
+
+  if [[ $USE_SDI == "true" ]]; then
+    sed -i -e 's/SDI_ENABLED_//g' localrc
+  else
+    sed -i -e 's/SDI_ENABLED_/#/g' localrc
   fi
 
   sed -i -e 's/\${CONTROLLER_HOST}/'$CTRL_IP'/g' localrc
