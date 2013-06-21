@@ -20,8 +20,11 @@ fi
 
 if [[ -z "$ERR" ]]; then
    TENANT_ID=`keystone token-get | grep tenant_id | awk '{print $4 }'`
-   PORT_ID=`quantum port-list -c id -c fixed_ips -c tenant_id | grep $TENANT_ID | grep "$VM_IP" | awk '{print $2}'`
+   PORT_ID=`quantum port-list -c id -c fixed_ips -c tenant_id | grep $TENANT_ID | grep "$VM_IP" | awk '{print $7}'`
    FLOATING_IP_ID=`quantum floatingip-list | grep "$FLOATING_IP" | awk '{print $2}'`
+
+   # disassociate whether it is associated or not, for safety.
+   quantum floatingip-disassociate $FLOATING_IP_ID
 
    quantum floatingip-associate $FLOATING_IP_ID $PORT_ID
 
