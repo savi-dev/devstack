@@ -383,9 +383,7 @@ if is_service_enabled fv; then
         sudo apt-get -y --force-yes install flowvisor
 
         # Generate database and configuration file
-        echo "Generating FlowVisor database and config file (one-time process)."
-        echo "Please press enter when prompted for the password"
-        sudo fvconfig generate /etc/flowvisor/fv_config.json
+        echo "" | sudo -u flowvisor fvconfig generate /etc/flowvisor/fv_config.json
     fi
 
     # Assuming FlowVisor installs to /etc/flowvisor directory...
@@ -393,7 +391,7 @@ if is_service_enabled fv; then
     if [[ ! -d $FV_DIR ]]; then
         sudo mkdir -p $FV_DIR
     fi
-    sudo chown flowvisor $FV_DIR
+    sudo chown flowvisor:flowvisor $FV_DIR
 
     if [[ -f $FV_DIR/fv_config.json ]]; then
         sudo mv $FV_DIR/fv_config.json $FV_DIR/fv_config.json.backup
@@ -404,15 +402,14 @@ if is_service_enabled fv; then
 
     if [[ ! -f $FV_DIR/passFile ]]; then
         sudo touch $FV_DIR/passFile
-        sudo echo '' > $FV_DIR/passFile
-        echo ''
+        sudo bash -c "echo '' > $FV_DIR/passFile"
     fi
 fi
 
 # FlowVisor Config File for Default Ryu Control
 RYU_FV_CONFIG=${RYU_FV_CONFIG:-/etc/flowvisor/fv_config.json}
 # FlowVisor Control Password File
-RYU_FV_PASSFILE=${RYU_FV_PASSFILE:-/usr/local/etc/flowvisor/passFile}
+RYU_FV_PASSFILE=${RYU_FV_PASSFILE:-/etc/flowvisor/passFile}
 # FlowVisor Non-Admin Slice Default Password
 RYU_FV_SLICE_PASS=${RYU_FV_SLICE_PASS:-supersecret}
 # FlowVisor Default Slice Name
@@ -420,7 +417,7 @@ RYU_FV_DEFAULT_SLICE=${RYU_FV_DEFAULT_SLICE:-fvadmin}
 # FlowVisor Listen Port
 RYU_FV_PORT=${RYU_FV_PORT:-6633}
 # FlowVisor API Port
-RYU_FV_API_PORT=`grep "api_webserver_port" $RYU_FV_CONFIG | cut -d "t" -f 2- | sed 's/[^0-9]//g'`
+RYU_FV_API_PORT=`grep "api_jetty_webserver_port" $RYU_FV_CONFIG | sed 's/[^0-9]//g'`
 
 # Name of the LVM volume group to use/create for iscsi volumes
 VOLUME_GROUP=${VOLUME_GROUP:-stack-volumes}
@@ -2095,6 +2092,7 @@ else
     add_nova_opt "compute_driver=libvirt.LibvirtDriver"
     LIBVIRT_FIREWALL_DRIVER=${LIBVIRT_FIREWALL_DRIVER:-"nova.virt.libvirt.firewall.IptablesFirewallDriver"}
     add_nova_opt "firewall_driver=$LIBVIRT_FIREWALL_DRIVER"
+    add_nova_opt "libvirt_use_virtio_for_bridges=True"
 fi
 
 
@@ -2332,7 +2330,8 @@ fi
 
 # Start up FlowVisor and give it time to start up
 if is_service_enabled fv; then
-    screen_it fv "cd ~ && sudo flowvisor -l $RYU_FV_CONFIG"
+    # Flowvisor 1.0+ needs to run as user 'flowvisor'
+    screen_it fv "cd ~ && sudo -u flowvisor flowvisor -l $RYU_FV_CONFIG"
     sleep 3
 fi
 

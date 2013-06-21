@@ -106,13 +106,13 @@ function configure_janus() {
     iniset $JANUS_CONF filter:authz admin_user glance
     iniset $JANUS_CONF filter:authz admin_password $SERVICE_PASSWORD
 
-    iniset $JANUS_CONF network of_ctrl_host $RYU_OFP_HOST
-    iniset $JANUS_CONF network of_ctrl_port $RYU_OFP_PORT
+    iniset $JANUS_CONF network of_ctrl_host $RYU_API_HOST
+    iniset $JANUS_CONF network of_ctrl_port $RYU_API_PORT
     iniset $JANUS_CONF network fv_api_port $RYU_FV_API_PORT
     iniset $JANUS_CONF network fv_pass_file $RYU_FV_PASSFILE
     iniset $JANUS_CONF network fv_slice_default_pass $RYU_FV_SLICE_PASS
     iniset $JANUS_CONF network fv_default_slice $RYU_FV_DEFAULT_SLICE
-    iniset $JANUS_CONF network api_db_url "$BASE_SQL_CONN/nova?charset=utf8"
+    iniset $JANUS_CONF network api_db_url "$BASE_SQL_CONN/janus?charset=utf8"
     iniset $JANUS_CONF network apps $JANUS_NETWORK_APPS
     iniset $JANUS_CONF network controller_cache_timeout $JANUS_CONTROLLER_CACHE_TIMEOUT
 
