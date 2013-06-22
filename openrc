@@ -32,6 +32,10 @@ if [[ -n "$4" ]]; then
     SERVICE_HOST=$4
 fi
 
+if [[ -n "$5" ]]; then
+    ADMIN_PASSWORD=$5
+fi
+
 # Find the other rc files
 RC_DIR=$(cd $(dirname "$BASH_SOURCE") && pwd)
 
