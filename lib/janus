@@ -94,7 +94,7 @@ function configure_janus() {
     iniset $JANUS_CONF filter:authtoken auth_port $KEYSTONE_AUTH_PORT
     iniset $JANUS_CONF filter:authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
     iniset $JANUS_CONF filter:authtoken auth_uri $KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_SERVICE_PORT/
-    iniset $JANUS_CONF filter:authtoken admin_tenant_name $ADMIN_TENANT_NAME
+    iniset $JANUS_CONF filter:authtoken admin_tenant_name admin
     iniset $JANUS_CONF filter:authtoken admin_user admin
     iniset $JANUS_CONF filter:authtoken admin_password $ADMIN_PASSWORD
 
@@ -135,7 +135,7 @@ function install_janus() {
     git_clone $JANUS_REPO $JANUS_DIR $JANUS_BRANCH
 }
 
-# install_janus() - Collect source and prepare
+# install_janusclient() - Collect source and prepare
 function install_janusclient() {
     git_clone $JANUS_CLIENT_REPO $JANUSCLIENT_DIR $JANUSCLIENT_BRANCH
 }

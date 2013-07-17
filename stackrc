@@ -70,8 +70,8 @@ KEYSTONE_REPO=${GIT_BASE}/savi-dev/keystone.git
 KEYSTONE_BRANCH=silver
 
 # a websockets/html5 or flash powered VNC console for vm instances
-NOVNC_REPO=https://github.com/kanaka/noVNC.git
-NOVNC_BRANCH=master             # 21Sep2012: 8dfd916946
+NOVNC_REPO=https://github.com/savi-dev/noVNC.git
+NOVNC_BRANCH=silver
 
 # django powered web control panel for openstack
 HORIZON_REPO=${GIT_BASE}/savi-dev/horizon.git
@@ -164,22 +164,19 @@ esac
 # 5Gb default volume backing file size
 VOLUME_BACKING_FILE_SIZE=${VOLUME_BACKING_FILE_SIZE:-5130M}
 
-# PRIVATE REPO
-GIT_BASE_PRIVATE=git@github.com
-
 # JANUS
-JANUS_REPO=${GIT_BASE_PRIVATE}:savi-dev/janus.git
+JANUS_REPO=https://github.com/savi-dev/janus.git
 JANUS_BRANCH=master
 
 # JANUS CLIENT
-JANUSCLIENT_REPO=${GIT_BASE_PRIVATE}:savi-dev/python-janusclient.git
+JANUSCLIENT_REPO=https://github.com/savi-dev/python-janusclient.git
 JANUSCLIENT_BRANCH=master
 
 # WHALE
-WHALE_REPO=${GIT_BASE_PRIVATE}:savi-dev/whale.git
+WHALE_REPO=https://github.com/savi-dev/whale.git
 WHALE_BRANCH=master
 
 # WHALE CLIENT
-WHALECLIENT_REPO=${GIT_BASE_PRIVATE}:savi-dev/python-whaleclient.git
+WHALECLIENT_REPO=https://github.com/savi-dev/python-whaleclient.git
 WHALECLIENT_BRANCH=master
 

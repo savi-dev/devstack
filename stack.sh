@@ -380,7 +380,7 @@ if is_service_enabled fv; then
         sudo apt-key add GPG-KEY-ONLAB
         sudo bash -c 'echo "deb http://updates.onlab.us/debian stable/" >> /etc/apt/sources.list'
         sudo apt-get update
-        sudo apt-get -y --force-yes install flowvisor
+        sudo apt-get -y --force-yes install flowvisor=1.0.8-1
 
         # Generate database and configuration file
         echo "" | sudo -u flowvisor fvconfig generate /etc/flowvisor/fv_config.json
@@ -2096,6 +2096,15 @@ else
     LIBVIRT_FIREWALL_DRIVER=${LIBVIRT_FIREWALL_DRIVER:-"nova.virt.libvirt.firewall.IptablesFirewallDriver"}
     add_nova_opt "firewall_driver=$LIBVIRT_FIREWALL_DRIVER"
     add_nova_opt "libvirt_use_virtio_for_bridges=True"
+    add_nova_opt "#start_guests_on_host_boot=true"
+    add_nova_opt "#resume_guests_state_on_host_boot=true"
+    add_nova_opt "use_cow_images=true"
+    add_nova_opt "running_deleted_instance_action=reap"
+    add_nova_opt "rescue_timeout=0"
+    add_nova_opt "reboot_timeout=0"
+    add_nova_opt "running_deleted_instance_timeout=0"
+    add_nova_opt "running_deleted_instance_poll_interval=30"
+    add_nova_opt "libvirt_wait_soft_reboot_seconds=60"
 fi
 
 
