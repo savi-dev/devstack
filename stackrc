@@ -45,7 +45,7 @@ CINDERCLIENT_BRANCH=master      # 1.0.0 20Sep2012: 2e6be694c1
 
 # compute service
 NOVA_REPO=${GIT_BASE}/savi-dev/nova.git
-NOVA_BRANCH=b-silver
+NOVA_BRANCH=savi-2.0-b
 
 # storage service
 SWIFT_REPO=${GIT_BASE}/savi-dev/swift.git
@@ -59,7 +59,7 @@ SWIFTCLIENT_BRANCH=master       # 1.2.0 12Sep2012: 68d1550f15
 
 # image catalog service
 GLANCE_REPO=${GIT_BASE}/savi-dev/glance.git
-GLANCE_BRANCH=silver
+GLANCE_BRANCH=savi-2.0
 
 # python glance client library
 GLANCECLIENT_REPO=${GIT_BASE}/savi-dev/python-glanceclient
@@ -67,15 +67,15 @@ GLANCECLIENT_BRANCH=master      # 0.5.1 11Sep2012: 3f67c461da
 
 # unified auth system (manages accounts/tokens)
 KEYSTONE_REPO=${GIT_BASE}/savi-dev/keystone.git
-KEYSTONE_BRANCH=silver
+KEYSTONE_BRANCH=savi-2.0
 
 # a websockets/html5 or flash powered VNC console for vm instances
 NOVNC_REPO=https://github.com/savi-dev/noVNC.git
-NOVNC_BRANCH=savi-1.1             # 21Sep2012: 8dfd916946
+NOVNC_BRANCH=savi-2.0
 
 # django powered web control panel for openstack
 HORIZON_REPO=${GIT_BASE}/savi-dev/horizon.git
-HORIZON_BRANCH=silver
+HORIZON_BRANCH=savi-2.0
 
 # python client library to nova that horizon (and others) use
 NOVACLIENT_REPO=${GIT_BASE}/savi-dev/python-novaclient.git
@@ -91,7 +91,7 @@ KEYSTONECLIENT_BRANCH=master    # 29Sep2012: a8f7879fcf
 
 # quantum service
 QUANTUM_REPO=${GIT_BASE}/savi-dev/quantum
-QUANTUM_BRANCH=silver
+QUANTUM_BRANCH=savi-2.0
 
 # quantum client
 QUANTUM_CLIENT_REPO=${GIT_BASE}/savi-dev/python-quantumclient
@@ -107,7 +107,7 @@ HEAT_BRANCH=master              # 27Sep2012: ed99838c28
 
 # ryu network controller
 RYU_REPO=https://github.com/savi-dev/ryu.git
-RYU_BRANCH=silver
+RYU_BRANCH=savi-2.0
 
 # Nova hypervisor configuration.  We default to libvirt with **kvm** but will
 # drop back to **qemu** if we are unable to load the kvm module.  ``stack.sh`` can
@@ -169,7 +169,7 @@ GIT_BASE_PRIVATE=git@github.com
 
 # JANUS
 JANUS_REPO=${GIT_BASE_PRIVATE}:savi-dev/janus.git
-JANUS_BRANCH=master
+JANUS_BRANCH=savi-2.0
 
 # JANUS CLIENT
 JANUSCLIENT_REPO=${GIT_BASE_PRIVATE}:savi-dev/python-janusclient.git
@@ -177,7 +177,7 @@ JANUSCLIENT_BRANCH=master
 
 # WHALE
 WHALE_REPO=${GIT_BASE_PRIVATE}:savi-dev/whale.git
-WHALE_BRANCH=master
+WHALE_BRANCH=savi-2.0
 
 # WHALE CLIENT
 WHALECLIENT_REPO=${GIT_BASE_PRIVATE}:savi-dev/python-whaleclient.git
