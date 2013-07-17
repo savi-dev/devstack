@@ -60,7 +60,7 @@ KEYSTONE_SERVICE_HOST=${KEYSTONE_AUTH_HOST:-$SERVICE_HOST}
 KEYSTONE_SERVICE_PORT=${KEYSTONE_SERVICE_PORT:-5000}
 KEYSTONE_SERVICE_PROTOCOL=${KEYSTONE_SERVICE_PROTOCOL:-http}
 
-
+ADMIN_TENANT_NAME=${ADMIN_TENANT_NAME:-admin}
 # Entry Points
 # ------------
 
@@ -93,6 +93,7 @@ function configure_janus() {
     iniset $JANUS_CONF filter:authtoken auth_port $KEYSTONE_AUTH_PORT
     iniset $JANUS_CONF filter:authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
     iniset $JANUS_CONF filter:authtoken auth_uri $KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_SERVICE_PORT/
+    iniset $JANUS_CONF filter:authtoken auth_region $REGION_NAME
     iniset $JANUS_CONF filter:authtoken admin_tenant_name $ADMIN_TENANT_NAME
     iniset $JANUS_CONF filter:authtoken admin_user admin
     iniset $JANUS_CONF filter:authtoken admin_password $ADMIN_PASSWORD
@@ -101,6 +102,7 @@ function configure_janus() {
     iniset $JANUS_CONF filter:authz auth_port $KEYSTONE_AUTH_PORT
     iniset $JANUS_CONF filter:authz auth_protocol $KEYSTONE_AUTH_PROTOCOL
     iniset $JANUS_CONF filter:authz auth_uri $KEYSTONE_SERVICE_PROTOCOL://$GLANCE_REGISTRY_AUTH_HOST:$KEYSTONE_SERVICE_PORT/
+    iniset $JANUS_CONF filter:authz auth_region $REGION_NAME
     iniset $JANUS_CONF filter:authz admin_tenant_name $SERVICE_TENANT_NAME
     iniset $JANUS_CONF filter:authz admin_user glance
     iniset $JANUS_CONF filter:authz admin_password $SERVICE_PASSWORD

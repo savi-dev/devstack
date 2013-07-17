@@ -100,9 +100,19 @@ function configure_whale() {
     iniset $WHALE_CONF filter:authtoken auth_port $GLANCE_REGISTRY_AUTH_PORT
     iniset $WHALE_CONF filter:authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
     iniset $WHALE_CONF filter:authtoken auth_uri $KEYSTONE_SERVICE_PROTOCOL://$GLANCE_REGISTRY_AUTH_HOST:$KEYSTONE_SERVICE_PORT/
+    iniset $WHALE_CONF filter:authtoken auth_region $REGION_NAME
     iniset $WHALE_CONF filter:authtoken admin_tenant_name $SERVICE_TENANT_NAME
     iniset $WHALE_CONF filter:authtoken admin_user glance
     iniset $WHALE_CONF filter:authtoken admin_password $SERVICE_PASSWORD
+
+    iniset $WHALE_CONF filter:authz auth_host $GLANCE_REGISTRY_AUTH_HOST
+    iniset $WHALE_CONF filter:authz auth_port $GLANCE_REGISTRY_AUTH_PORT
+    iniset $WHALE_CONF filter:authz auth_protocol $KEYSTONE_AUTH_PROTOCOL
+    iniset $WHALE_CONF filter:authz auth_uri $KEYSTONE_SERVICE_PROTOCOL://$GLANCE_REGISTRY_AUTH_HOST:$KEYSTONE_SERVICE_PORT/
+    iniset $WHALE_CONF filter:authz auth_region $REGION_NAME
+    iniset $WHALE_CONF filter:authz admin_tenant_name $SERVICE_TENANT_NAME
+    iniset $WHALE_CONF filter:authz admin_user glance
+    iniset $WHALE_CONF filter:authz admin_password $SERVICE_PASSWORD
 
     iniset $WHALE_CONF openstack db_host $MYSQL_HOST
     iniset $WHALE_CONF openstack db_user $MYSQL_USER
