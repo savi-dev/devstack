@@ -380,7 +380,7 @@ if is_service_enabled fv; then
         sudo apt-key add GPG-KEY-ONLAB
         sudo bash -c 'echo "deb http://updates.onlab.us/debian stable/" >> /etc/apt/sources.list'
         sudo apt-get update
-        sudo apt-get -y --force-yes install flowvisor
+        sudo apt-get -y --force-yes install flowvisor=1.0.8-1
 
         # Generate database and configuration file
         echo "" | sudo -u flowvisor fvconfig generate /etc/flowvisor/fv_config.json

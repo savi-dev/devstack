@@ -91,6 +91,7 @@ function configure_whale() {
 
     if [[ "$WHALE_CONF_DIR" != "$WHALE_DIR/etc" ]]; then
         cp -p $WHALE_DIR/etc/whale-api.conf $WHALE_CONF
+        cp -p $WHALE_DIR/etc/policy.json $WHALE_CONF_DIR
     fi
 
     # Rewrite stock ``keystone.conf``
