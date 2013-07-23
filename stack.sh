@@ -933,6 +933,7 @@ fi
 if is_service_enabled nova; then
     # compute service
     install_nova
+    install_janusclient
 fi
 if is_service_enabled n-novnc; then
     # a websockets/html5 or flash powered VNC console for vm instances
@@ -970,7 +971,6 @@ if is_service_enabled whale; then
 fi
 if is_service_enabled janus; then
     install_janus
-    install_janusclient
 fi
 if is_service_enabled ryu; then
     git_clone $RYU_REPO $RYU_DIR $RYU_BRANCH
@@ -1004,6 +1004,7 @@ fi
 configure_glanceclient
 
 if is_service_enabled nova; then
+    configure_janusclient
     configure_nova
 fi
 if is_service_enabled horizon; then
@@ -1025,7 +1026,6 @@ if is_service_enabled whale; then
 fi
 if is_service_enabled janus; then
     configure_janus
-    configure_janusclient
 fi
 if is_service_enabled ryu; then
     sudo apt-get -y --force-yes install python-dpkt
