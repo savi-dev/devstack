@@ -267,20 +267,20 @@ if [[ "$USE_OF" == "y" || "$USE_OF" == "Y" ]]; then
     fi
     echo ''
 
-    if [[ $AGENT == 0 ]]; then
-        read -p "Do you want to install FlowVisor? ([n]/y) " FV_ENABLED
-        if [[ "$FV_ENABLED" == "y" || "$FV_ENABLED" == "Y" ]]; then
-            read -p "What port is FlowVisor listening on? [6633] " FV_PORT
-            if [ ! $FV_PORT ]; then
-                FV_PORT=6633
-            fi
-
-            while [[ "$OF_PORT" == "$FV_PORT" ]]; do
-                read -p "FlowVisor port conflict with OpenFlow controller port. Choose another. " FV_PORT
-            done
+    read -p "Do you want to install FlowVisor? ([n]/y) " FV_ENABLED
+    if [[ "$FV_ENABLED" == "y" || "$FV_ENABLED" == "Y" ]]; then
+        read -p "What port is FlowVisor listening on? [6633] " FV_PORT
+        if [ ! $FV_PORT ]; then
+            FV_PORT=6633
         fi
 
-        echo ''
+        while [[ "$OF_PORT" == "$FV_PORT" ]]; do
+            read -p "FlowVisor port conflict with OpenFlow controller port. Choose another. " FV_PORT
+        done
+    fi
+    echo ''
+
+    if [[ $AGENT == 0 ]]; then
         read -p "Do you want to use SDI Manager? ([y]/n) " SDI_ENABLED
         if [[ "$SDI_ENABLED" == "n" || "$SDI_ENABLED" == "N" ]]; then
             USE_SDI=false
@@ -288,15 +288,6 @@ if [[ "$USE_OF" == "y" || "$USE_OF" == "Y" ]]; then
             USE_SDI=true
         fi
     else
-        read -p "Is FlowVisor in use on the controller node? ([n]/y)" FV_ENABLED
-        if [[ "$FV_ENABLED" == "y" || "$FV_ENABLED" == "Y" ]]; then
-            read -p "What port is FlowVisor listening on? [6633] " OF_PORT
-            if [ ! $OF_PORT ]; then
-                OF_PORT=6633
-            fi
-        fi
-        echo ''
-
         read -p "Is the SDI Manager in use on the controller node? ([n]/y)" SDI_ENABLED
         if [[ "$SDI_ENABLED" == "n" || "$SDI_ENABLED" == "N" ]]; then
             USE_SDI=false
@@ -419,7 +410,7 @@ if [[ $AGENT == 0 ]]; then
 
   echo "localrc generated for the controller node."
 else
-  echo "What's the controller's ip address?"
+  echo "What's the controller's management ip address?"
   read CTRL_IP
 
   cp $OF_DIR/agent-localrc localrc
@@ -443,6 +434,7 @@ else
   sed -i -e 's/\${Q_PLUGIN}/'$Q_PLUGIN'/g' localrc
   sed -i -e 's/\${RYU_HOST}/'$CTRL_IP'/g' localrc
   sed -i -e 's/\${RYU_PORT}/'$OF_PORT'/g' localrc
+  sed -i -e 's/\${FV_PORT}/'$FV_PORT'/g' localrc
 
   echo "localrc generated for a compute node."
 fi
