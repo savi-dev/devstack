@@ -139,7 +139,7 @@ function install_janus() {
 
 # install_janusclient() - Collect source and prepare
 function install_janusclient() {
-    git_clone $JANUS_CLIENT_REPO $JANUSCLIENT_DIR $JANUSCLIENT_BRANCH
+    git_clone $JANUSCLIENT_REPO $JANUSCLIENT_DIR $JANUSCLIENT_BRANCH
 }
 
 # start_janus() - Start running processes, including screen
