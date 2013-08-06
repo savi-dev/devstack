@@ -21,22 +21,31 @@ SWIFTCLIENT_DIR=$DEST/python-swiftclient
 QUANTUM_DIR=$DEST/quantum
 QUANTUM_CLIENT_DIR=$DEST/python-quantumclient
 RYU_DIR=$DEST/ryu
+JANUS_DIR=$DEST/janus
 
-AGENT_BINARY="$QUANTUM_DIR/bin/quantum-ryu-agent"
+if [[ "$Q_PLUGIN" = "ryu" ]]; then
+    AGENT_BINARY="$QUANTUM_DIR/bin/quantum-ryu-agent"
+    Q_PLUGIN_CONF_PATH=etc/quantum/plugins/ryu
+    Q_PLUGIN_CONF_FILENAME=ryu.ini
+elif [[ "$Q_PLUGIN" = "janus" ]]; then
+    AGENT_BINARY="$QUANTUM_DIR/quantum/plugins/janus/agent/janus_quantum_agent"
+    Q_PLUGIN_CONF_PATH=etc/quantum/plugins/janus
+    Q_PLUGIN_CONF_FILENAME=janus.ini
+else
+    echo "ERROR: Unknown Quantum plugin"
+    exit 1
+fi
 AGENT_DHCP_BINARY="$QUANTUM_DIR/bin/quantum-dhcp-agent"
-
 AGENT_L3_BINARY="$QUANTUM_DIR/bin/quantum-l3-agent"
 Q_L3_CONF_FILE=/etc/quantum/l3_agent.ini
 
 Q_CONF_FILE=/etc/quantum/quantum.conf
 Q_DHCP_CONF_FILE=/etc/quantum/dhcp_agent.ini
 
-Q_PLUGIN_CONF_PATH=etc/quantum/plugins/ryu
-Q_PLUGIN_CONF_FILENAME=ryu.ini
 Q_PLUGIN_CONF_FILE=$Q_PLUGIN_CONF_PATH/$Q_PLUGIN_CONF_FILENAME
 
 # FlowVisor Config File for Default Ryu Control
-RYU_FV_CONFIG=${RYU_FV_CONFIG:-/usr/etc/flowvisor/fv_config.json}
+RYU_FV_CONFIG=${RYU_FV_CONFIG:-/etc/flowvisor/fv_config.json}
 
 RYU_CONF_DIR=/etc/ryu
 RYU_CONF=$RYU_CONF_DIR/ryu.conf
@@ -98,6 +107,7 @@ echo test  q-dhcp "python $AGENT_DHCP_BINARY --config-file $Q_CONF_FILE --config
 echo test  q-l3 "python $AGENT_L3_BINARY --config-file $Q_CONF_FILE --config-file=$Q_L3_CONF_FILE"
 echo test  q-agt "python $AGENT_BINARY --config-file $Q_CONF_FILE --config-file /$Q_PLUGIN_CONF_FILE"
 echo test  fv "cd ~ && sudo flowvisor -l $RYU_FV_CONFIG"
+echo test  fv-agt "cd $JANUS_DIR/janus/network/agent/flowvisor && ./janus_flowvisor_agent"
 
 echo test screen_it  q-agt "python $AGENT_BINARY --config-file $Q_CONF_FILE --config-file /$Q_PLUGIN_CONF_FILE"
 echo test screen_it  n-novnc "cd $NOVNC_DIR && ./utils/nova-novncproxy --config-file $NOVA_CONF --web ."
@@ -109,3 +119,9 @@ screen_it  n-novnc "cd $NOVNC_DIR && ./utils/nova-novncproxy --config-file $NOVA
 sleep 2
 screen_it  n-cpu "cd $NOVA_DIR && sg libvirtd \"$NOVA_BIN_DIR/nova-compute --config-dir=$NOVA_CONF_DIR\" $NL"
 
+if is_service_enabled fv-agt; then
+    sleep 2
+    screen_it fv "cd ~ && sudo -u flowvisor flowvisor -l $RYU_FV_CONFIG"
+    sleep 2
+    screen_it fv-agt "cd $JANUS_DIR/janus/network/agent/flowvisor && ./janus_flowvisor_agent"
+fi
