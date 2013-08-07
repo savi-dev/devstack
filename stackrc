@@ -29,41 +29,41 @@ GIT_BASE=https://github.com
 
 # metering service
 CEILOMETER_REPO=https://github.com/stackforge/ceilometer.git
-CEILOMETER_BRANCH=master
+CEILOMETER_BRANCH=savi-2.1
 
 # volume service
 CINDER_REPO=${GIT_BASE}/savi-dev/cinder
-CINDER_BRANCH=master
+CINDER_BRANCH=savi-2.1
 
 # volume client
 CINDERCLIENT_REPO=${GIT_BASE}/savi-dev/python-cinderclient
-CINDERCLIENT_BRANCH=master
+CINDERCLIENT_BRANCH=savi-2.1
 
 # compute service
 NOVA_REPO=${GIT_BASE}/savi-dev/nova.git
-NOVA_BRANCH=master
+NOVA_BRANCH=savi-2.1
 
 # storage service
 SWIFT_REPO=${GIT_BASE}/savi-dev/swift.git
-SWIFT_BRANCH=master
+SWIFT_BRANCH=savi-2.1
 SWIFT3_REPO=https://github.com/savi-dev/swift3.git
-SWIFT3_BRANCH=saviws2012
+SWIFT3_BRANCH=savi-2.1
 
 # python swift client library
 SWIFTCLIENT_REPO=${GIT_BASE}/savi-dev/python-swiftclient
-SWIFTCLIENT_BRANCH=master
+SWIFTCLIENT_BRANCH=savi-2.1
 
 # image catalog service
 GLANCE_REPO=${GIT_BASE}/savi-dev/glance.git
-GLANCE_BRANCH=master
+GLANCE_BRANCH=savi-2.1
 
 # python glance client library
 GLANCECLIENT_REPO=${GIT_BASE}/savi-dev/python-glanceclient
-GLANCECLIENT_BRANCH=master
+GLANCECLIENT_BRANCH=savi-2.1
 
 # unified auth system (manages accounts/tokens)
 KEYSTONE_REPO=${GIT_BASE}/savi-dev/keystone.git
-KEYSTONE_BRANCH=master
+KEYSTONE_BRANCH=savi-2.1
 
 # a websockets/html5 or flash powered VNC console for vm instances
 NOVNC_REPO=https://github.com/savi-dev/noVNC.git
@@ -71,43 +71,43 @@ NOVNC_BRANCH=saviws2012
 
 # django powered web control panel for openstack
 HORIZON_REPO=${GIT_BASE}/savi-dev/horizon.git
-HORIZON_BRANCH=master
+HORIZON_BRANCH=savi-2.1
 
 # python client library to nova that horizon (and others) use
 NOVACLIENT_REPO=${GIT_BASE}/savi-dev/python-novaclient.git
-NOVACLIENT_BRANCH=master
+NOVACLIENT_BRANCH=savi-2.1
 
 # Shared openstack python client library
 OPENSTACKCLIENT_REPO=${GIT_BASE}/savi-dev/python-openstackclient.git
-OPENSTACKCLIENT_BRANCH=master
+OPENSTACKCLIENT_BRANCH=savi-2.1
 
 # python keystone client library to nova that horizon uses
 KEYSTONECLIENT_REPO=${GIT_BASE}/savi-dev/python-keystoneclient
-KEYSTONECLIENT_BRANCH=master
+KEYSTONECLIENT_BRANCH=savi-2.1
 
 # quantum service
 QUANTUM_REPO=${GIT_BASE}/savi-dev/quantum
-QUANTUM_BRANCH=master
+QUANTUM_BRANCH=savi-2.1
 
 # quantum client
 QUANTUM_CLIENT_REPO=${GIT_BASE}/savi-dev/python-quantumclient
-QUANTUM_CLIENT_BRANCH=master
+QUANTUM_CLIENT_BRANCH=savi-2.1
 
 # Tempest test suite
 TEMPEST_REPO=${GIT_BASE}/savi-dev/tempest.git
-TEMPEST_BRANCH=master
+TEMPEST_BRANCH=savi-2.1
 
 # melange service
 MELANGE_REPO=${GIT_BASE}/savi-dev/melange.git
-MELANGE_BRANCH=master
+MELANGE_BRANCH=savi-2.1
 
 # python melange client library
 MELANGECLIENT_REPO=${GIT_BASE}/savi-dev/python-melangeclient.git
-MELANGECLIENT_BRANCH=master
+MELANGECLIENT_BRANCH=savi-2.1
 
 # ryu service
 RYU_REPO=https://github.com/savi-dev/ryu.git
-RYU_BRANCH=master
+RYU_BRANCH=savi-2.1
 # Nova hypervisor configuration.  We default to libvirt with **kvm** but will
 # drop back to **qemu** if we are unable to load the kvm module.  ``stack.sh`` can
 # also install an **LXC** or **OpenVZ** based system.
