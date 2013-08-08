@@ -23,91 +23,92 @@ NOVA_ENABLED_APIS=ec2,osapi_compute,osapi_volume,metadata
 # Repositories
 # ------------
 
+# The comments on the branch lines below point to either the release closest
+# to the OpenStack Folsom release or what commit was master near the time this
+# DevStack branch was cut.
+
 # Base GIT Repo URL
 # Another option is http://review.openstack.org/p
 GIT_BASE=https://github.com
 
 # metering service
 CEILOMETER_REPO=https://github.com/stackforge/ceilometer.git
-CEILOMETER_BRANCH=savi-2.1
+CEILOMETER_BRANCH=master
 
 # volume service
 CINDER_REPO=${GIT_BASE}/savi-dev/cinder
-CINDER_BRANCH=savi-2.1
+CINDER_BRANCH=stable/folsom
 
 # volume client
 CINDERCLIENT_REPO=${GIT_BASE}/savi-dev/python-cinderclient
-CINDERCLIENT_BRANCH=savi-2.1
+CINDERCLIENT_BRANCH=master      # 1.0.0 20Sep2012: 2e6be694c1
 
 # compute service
 NOVA_REPO=${GIT_BASE}/savi-dev/nova.git
-NOVA_BRANCH=savi-2.1
+NOVA_BRANCH=master
 
 # storage service
 SWIFT_REPO=${GIT_BASE}/savi-dev/swift.git
-SWIFT_BRANCH=savi-2.1
-SWIFT3_REPO=https://github.com/savi-dev/swift3.git
-SWIFT3_BRANCH=savi-2.1
+SWIFT_BRANCH=stable/folsom
+SWIFT3_REPO=https://github.com/fujita/swift3.git
+SWIFT3_BRANCH=master            # 10Jul2012: f216f1b4f2
 
 # python swift client library
 SWIFTCLIENT_REPO=${GIT_BASE}/savi-dev/python-swiftclient
-SWIFTCLIENT_BRANCH=savi-2.1
+SWIFTCLIENT_BRANCH=master       # 1.2.0 12Sep2012: 68d1550f15
 
 # image catalog service
 GLANCE_REPO=${GIT_BASE}/savi-dev/glance.git
-GLANCE_BRANCH=savi-2.1
+GLANCE_BRANCH=master
 
 # python glance client library
 GLANCECLIENT_REPO=${GIT_BASE}/savi-dev/python-glanceclient
-GLANCECLIENT_BRANCH=savi-2.1
+GLANCECLIENT_BRANCH=master      # 0.5.1 11Sep2012: 3f67c461da
 
 # unified auth system (manages accounts/tokens)
 KEYSTONE_REPO=${GIT_BASE}/savi-dev/keystone.git
-KEYSTONE_BRANCH=savi-2.1
+KEYSTONE_BRANCH=master
 
 # a websockets/html5 or flash powered VNC console for vm instances
 NOVNC_REPO=https://github.com/savi-dev/noVNC.git
-NOVNC_BRANCH=saviws2012
+NOVNC_BRANCH=silver
 
 # django powered web control panel for openstack
 HORIZON_REPO=${GIT_BASE}/savi-dev/horizon.git
-HORIZON_BRANCH=savi-2.1
+HORIZON_BRANCH=master
 
 # python client library to nova that horizon (and others) use
 NOVACLIENT_REPO=${GIT_BASE}/savi-dev/python-novaclient.git
-NOVACLIENT_BRANCH=savi-2.1
+NOVACLIENT_BRANCH=master        # 2.9.0 21Sep2012: cdebf729b0
 
-# Shared openstack python client library
+# consolidated openstack python client
 OPENSTACKCLIENT_REPO=${GIT_BASE}/savi-dev/python-openstackclient.git
-OPENSTACKCLIENT_BRANCH=savi-2.1
+OPENSTACKCLIENT_BRANCH=master   # 14Sep2012: cd140091b5
 
 # python keystone client library to nova that horizon uses
 KEYSTONECLIENT_REPO=${GIT_BASE}/savi-dev/python-keystoneclient
-KEYSTONECLIENT_BRANCH=savi-2.1
+KEYSTONECLIENT_BRANCH=master    # 29Sep2012: a8f7879fcf
 
 # quantum service
 QUANTUM_REPO=${GIT_BASE}/savi-dev/quantum
-QUANTUM_BRANCH=savi-2.1
+QUANTUM_BRANCH=master
 
 # quantum client
 QUANTUM_CLIENT_REPO=${GIT_BASE}/savi-dev/python-quantumclient
-QUANTUM_CLIENT_BRANCH=savi-2.1
+QUANTUM_CLIENT_BRANCH=master    # 2.1 14Sep2012: bc7ba5e19d
 
 # Tempest test suite
 TEMPEST_REPO=${GIT_BASE}/savi-dev/tempest.git
-TEMPEST_BRANCH=savi-2.1
+TEMPEST_BRANCH=master           # 01Oct2012: 2f5db941f5
 
-# melange service
-MELANGE_REPO=${GIT_BASE}/savi-dev/melange.git
-MELANGE_BRANCH=savi-2.1
+# heat service
+HEAT_REPO=${GIT_BASE}/heat-api/heat.git
+HEAT_BRANCH=master              # 27Sep2012: ed99838c28
 
-# python melange client library
-MELANGECLIENT_REPO=${GIT_BASE}/savi-dev/python-melangeclient.git
-MELANGECLIENT_BRANCH=savi-2.1
-
-# ryu service
+# ryu network controller
 RYU_REPO=https://github.com/savi-dev/ryu.git
-RYU_BRANCH=savi-2.1
+RYU_BRANCH=master
+
 # Nova hypervisor configuration.  We default to libvirt with **kvm** but will
 # drop back to **qemu** if we are unable to load the kvm module.  ``stack.sh`` can
 # also install an **LXC** or **OpenVZ** based system.
@@ -162,3 +163,19 @@ esac
 
 # 5Gb default volume backing file size
 VOLUME_BACKING_FILE_SIZE=${VOLUME_BACKING_FILE_SIZE:-5130M}
+
+# JANUS
+JANUS_REPO=https://github.com/savi-dev/janus.git
+JANUS_BRANCH=master
+
+# JANUS CLIENT
+JANUSCLIENT_REPO=https://github.com/savi-dev/python-janusclient.git
+JANUSCLIENT_BRANCH=master
+
+# WHALE
+WHALE_REPO=https://github.com/savi-dev/whale.git
+WHALE_BRANCH=master
+
+# WHALE CLIENT
+WHALECLIENT_REPO=https://github.com/savi-dev/python-whaleclient.git
+WHALECLIENT_BRANCH=master
