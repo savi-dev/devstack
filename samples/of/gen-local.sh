@@ -282,18 +282,15 @@ if [[ "$USE_OF" == "y" || "$USE_OF" == "Y" ]]; then
 
     if [[ $AGENT == 0 ]]; then
         read -p "Do you want to use SDI Manager? ([y]/n) " SDI_ENABLED
-        if [[ "$SDI_ENABLED" == "n" || "$SDI_ENABLED" == "N" ]]; then
-            USE_SDI=false
-        else
-            USE_SDI=true
-        fi
     else
-        read -p "Is the SDI Manager in use on the controller node? ([n]/y)" SDI_ENABLED
-        if [[ "$SDI_ENABLED" == "n" || "$SDI_ENABLED" == "N" ]]; then
-            USE_SDI=false
-        else
-            USE_SDI=true
-        fi
+        read -p "Is the SDI Manager in use on the controller node? ([y]/n)" SDI_ENABLED
+    fi
+
+    if [[ "$SDI_ENABLED" == "n" || "$SDI_ENABLED" == "N" ]]; then
+        USE_SDI=false
+    else
+        USE_SDI=true
+        Q_PLUGIN=janus
     fi
     echo ''
 fi

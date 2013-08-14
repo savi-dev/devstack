@@ -243,7 +243,11 @@ is baremetal_pxe_vlan_per_host $BM_PXE_PER_NODE
 is baremetal_pxe_parent_interface $BM_PXE_INTERFACE
 is firewall_driver ""
 isb firewall_driver ""
-is baremetal_vif_driver nova.virt.baremetal.ryu.ryu_vif_driver.RyuVIFDriver
+if [[ "$Q_PLUGIN" = "ryu" ]]; then
+    is baremetal_vif_driver nova.virt.baremetal.ryu.ryu_vif_driver.RyuVIFDriver
+elif [[ "$Q_PLUGIN" = "janus" ]]; then
+    is baremetal_vif_driver nova.virt.baremetal.janus.janus_vif_driver.JanusVIFDriver
+fi
 is host $BMC_HOST
 isb host $BEE2_HOST
 iso host `hostname -f`
