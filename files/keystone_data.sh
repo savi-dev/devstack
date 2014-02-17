@@ -80,9 +80,9 @@ if [[ "$ENABLED_SERVICES" =~ "heat" ]]; then
             --type=cloudformation \
             --description="Heat CloudFormation Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $HEAT_CFN_SERVICE \
-            --publicurl "http://$SERVICE_HOST:$HEAT_API_CFN_PORT/v1" \
+            --publicurl "http://$PUBLIC_SERVICE_HOST:$HEAT_API_CFN_PORT/v1" \
             --adminurl "http://$SERVICE_HOST:$HEAT_API_CFN_PORT/v1" \
             --internalurl "http://$SERVICE_HOST:$HEAT_API_CFN_PORT/v1"
         HEAT_SERVICE=$(get_id keystone service-create \
@@ -90,9 +90,9 @@ if [[ "$ENABLED_SERVICES" =~ "heat" ]]; then
             --type=orchestration \
             --description="Heat Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $HEAT_SERVICE \
-            --publicurl "http://$SERVICE_HOST:$HEAT_API_PORT/v1/\$(tenant_id)s" \
+            --publicurl "http://$PUBLIC_SERVICE_HOST:$HEAT_API_PORT/v1/\$(tenant_id)s" \
             --adminurl "http://$SERVICE_HOST:$HEAT_API_PORT/v1/\$(tenant_id)s" \
             --internalurl "http://$SERVICE_HOST:$HEAT_API_PORT/v1/\$(tenant_id)s"
     fi
@@ -115,9 +115,9 @@ if [[ "$ENABLED_SERVICES" =~ "g-api" ]]; then
             --type=image \
             --description="Glance Image Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $GLANCE_SERVICE \
-            --publicurl "http://$SERVICE_HOST:9292" \
+            --publicurl "http://$PUBLIC_SERVICE_HOST:9292" \
             --adminurl "http://$SERVICE_HOST:9292" \
             --internalurl "http://$SERVICE_HOST:9292"
     fi
@@ -142,9 +142,9 @@ if [[ "$ENABLED_SERVICES" =~ "ceilometer" ]]; then
             --type=metering \
             --description="Ceilometer Service")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $CEILOMETER_SERVICE \
-            --publicurl "http://$SERVICE_HOST:8777" \
+            --publicurl "http://$PUBLIC_SERVICE_HOST:8777" \
             --adminurl "http://$SERVICE_HOST:8777" \
             --internalurl "http://$SERVICE_HOST:8777"
     fi
@@ -158,9 +158,9 @@ if [[ "$ENABLED_SERVICES" =~ "n-api" ]]; then
             --type=ec2 \
             --description="EC2 Compatibility Layer")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $EC2_SERVICE \
-            --publicurl "http://$SERVICE_HOST:8773/services/Cloud" \
+            --publicurl "http://$PUBLIC_SERVICE_HOST:8773/services/Cloud" \
             --adminurl "http://$SERVICE_HOST:8773/services/Admin" \
             --internalurl "http://$SERVICE_HOST:8773/services/Cloud"
     fi
@@ -174,9 +174,9 @@ if [[ "$ENABLED_SERVICES" =~ "n-obj" || "$ENABLED_SERVICES" =~ "swift3" ]]; then
             --type=s3 \
             --description="S3")
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $S3_SERVICE \
-            --publicurl "http://$SERVICE_HOST:$S3_SERVICE_PORT" \
+            --publicurl "http://$PUBLIC_SERVICE_HOST:$S3_SERVICE_PORT" \
             --adminurl "http://$SERVICE_HOST:$S3_SERVICE_PORT" \
             --internalurl "http://$SERVICE_HOST:$S3_SERVICE_PORT"
     fi

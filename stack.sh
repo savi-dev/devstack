@@ -271,6 +271,7 @@ fi
 
 # Allow the use of an alternate hostname (such as localhost/127.0.0.1) for service endpoints.
 SERVICE_HOST=${SERVICE_HOST:-$HOST_IP}
+PUBLIC_SERVICE_HOST=${PUBLIC_SERVICE_HOST:-$SERVICE_HOST}
 
 # Allow the use of an alternate protocol (such as https) for service endpoints
 SERVICE_PROTOCOL=${SERVICE_PROTOCOL:-http}
@@ -312,6 +313,8 @@ source $TOP_DIR/lib/baremetal
 source $TOP_DIR/lib/ldap
 source $TOP_DIR/lib/ironic
 source $TOP_DIR/lib/trove
+source $TOP_DIR/lib/whale
+source $TOP_DIR/lib/janus
 
 # Extras Source
 # --------------
@@ -646,8 +649,10 @@ git_clone $OPENSTACKCLIENT_REPO $OPENSTACKCLIENT_DIR $OPENSTACKCLIENT_BRANCH
 setup_develop $OPENSTACKCLIENT_DIR
 
 if is_service_enabled key; then
-    install_keystone
-    configure_keystone
+    if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
+       install_keystone
+       configure_keystone
+    fi
 fi
 
 if is_service_enabled s-proxy; then
@@ -734,6 +739,19 @@ if is_service_enabled ir-api ir-cond; then
     install_ironic
     configure_ironic
 fi
+
+if is_service_enabled whale; then
+    install_whale
+    install_whaleclient
+    configure_whale
+    configure_whaleclient
+fi
+
+#janus will be installed as part of neutron third party
+#if is_service_enabled janus fv-agt; then
+    #install_janus
+    #configure_janus
+#fi
 
 # Extras Install
 # --------------
@@ -854,9 +872,11 @@ fi
 # --------
 
 if is_service_enabled key; then
-    echo_summary "Starting Keystone"
-    init_keystone
-    start_keystone
+    if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
+       echo_summary "Starting Keystone"
+       init_keystone
+       start_keystone
+    fi
 
     # Set up a temporary admin URI for Keystone
     SERVICE_ENDPOINT=$KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_AUTH_PORT/v2.0
@@ -870,25 +890,31 @@ if is_service_enabled key; then
     # Do the keystone-specific bits from keystone_data.sh
     export OS_SERVICE_TOKEN=$SERVICE_TOKEN
     export OS_SERVICE_ENDPOINT=$SERVICE_ENDPOINT
-    create_keystone_accounts
-    create_nova_accounts
-    create_cinder_accounts
-    create_neutron_accounts
+    #export PUBLIC_SERVICE_HOST=${PUBLIC_SERVICE_HOST:-$SERVICE_HOST}
+    if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
+       create_keystone_accounts
+       create_nova_accounts
+       create_cinder_accounts
+       create_neutron_accounts
 
-    if is_service_enabled trove; then
-        create_trove_accounts
-    fi
+       if is_service_enabled trove; then
+          create_trove_accounts
+       fi
 
-    if is_service_enabled swift || is_service_enabled s-proxy; then
-        create_swift_accounts
+       if is_service_enabled swift || is_service_enabled s-proxy; then
+         create_swift_accounts
+       fi
     fi
+    SERVICE_ENDPOINT=$KEYSTONE_AUTH_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_AUTH_PORT/v2.0
 
     # ``keystone_data.sh`` creates services, admin and demo users, and roles.
     ADMIN_PASSWORD=$ADMIN_PASSWORD SERVICE_TENANT_NAME=$SERVICE_TENANT_NAME SERVICE_PASSWORD=$SERVICE_PASSWORD \
     SERVICE_TOKEN=$SERVICE_TOKEN SERVICE_ENDPOINT=$SERVICE_ENDPOINT SERVICE_HOST=$SERVICE_HOST \
     S3_SERVICE_PORT=$S3_SERVICE_PORT KEYSTONE_CATALOG_BACKEND=$KEYSTONE_CATALOG_BACKEND \
     DEVSTACK_DIR=$TOP_DIR ENABLED_SERVICES=$ENABLED_SERVICES HEAT_API_CFN_PORT=$HEAT_API_CFN_PORT \
-    HEAT_API_PORT=$HEAT_API_PORT \
+    HEAT_API_PORT=$HEAT_API_PORT REGION_NAME=$REGION_NAME KEYSTONE_TYPE=$KEYSTONE_TYPE \
+    PUBLIC_SERVICE_HOST=$PUBLIC_SERVICE_HOST REGIONS=$REGIONS JANUS_POLICY_FILE=$JANUS_POLICY_FILE \
+    WHALE_POLICY_FILE=$WHALE_POLICY_FILE \
         bash -x $FILES/keystone_data.sh
 
     # Set up auth creds now that keystone is bootstrapped
@@ -943,6 +969,21 @@ if is_service_enabled neutron; then
     fi
 fi
 
+if is_service_enabled neo4j; then
+    start_graphdb
+fi
+
+if is_service_enabled whale; then
+    init_whale
+    start_whale
+fi
+
+#janus will be inited and started as part of neutron thirdparty
+#if is_service_enabled janus; then
+    #init_janus
+    #start_janus
+#fi
+
 # Some Neutron plugins require network controllers which are not
 # a part of the OpenStack project. Configure and start them.
 if is_service_enabled neutron; then
@@ -950,7 +991,6 @@ if is_service_enabled neutron; then
     init_neutron_third_party
     start_neutron_third_party
 fi
-
 
 # Nova
 # ----

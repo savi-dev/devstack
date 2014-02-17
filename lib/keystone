@@ -286,17 +286,23 @@ create_keystone_accounts() {
     INVIS_TENANT=$(keystone tenant-create --name=invisible_to_admin | grep " id " | get_field 2)
 
     # demo
-    DEMO_TENANT=$(keystone tenant-create \
-        --name=demo \
+    DEMO1_TENANT=$(keystone tenant-create \
+        --name=demo1 \
+        | grep " id " | get_field 2)
+    DEMO2_TENANT=$(keystone tenant-create \
+        --name=demo2 \
         | grep " id " | get_field 2)
     DEMO_USER=$(keystone user-create \
         --name demo \
         --pass "$ADMIN_PASSWORD" \
         --email demo@example.com \
         | grep " id " | get_field 2)
-    keystone user-role-add --user-id $DEMO_USER --role-id $MEMBER_ROLE --tenant-id $DEMO_TENANT
-    keystone user-role-add --user-id $ADMIN_USER --role-id $ADMIN_ROLE --tenant-id $DEMO_TENANT
-    keystone user-role-add --user-id $DEMO_USER --role-id $ANOTHER_ROLE --tenant-id $DEMO_TENANT
+    keystone user-role-add --user-id $DEMO_USER --role-id $MEMBER_ROLE --tenant-id $DEMO1_TENANT
+    keystone user-role-add --user-id $ADMIN_USER --role-id $ADMIN_ROLE --tenant-id $DEMO1_TENANT
+    keystone user-role-add --user-id $DEMO_USER --role-id $ANOTHER_ROLE --tenant-id $DEMO1_TENANT
+    keystone user-role-add --user-id $DEMO_USER --role-id $MEMBER_ROLE --tenant-id $DEMO2_TENANT
+    keystone user-role-add --user-id $ADMIN_USER --role-id $ADMIN_ROLE --tenant-id $DEMO2_TENANT
+    keystone user-role-add --user-id $DEMO_USER --role-id $ANOTHER_ROLE --tenant-id $DEMO2_TENANT
     keystone user-role-add --user-id $DEMO_USER --role-id $MEMBER_ROLE --tenant-id $INVIS_TENANT
 
     # Keystone
@@ -307,7 +313,7 @@ create_keystone_accounts() {
             --description "Keystone Identity Service" \
             | grep " id " | get_field 2)
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $KEYSTONE_SERVICE \
             --publicurl "$KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_SERVICE_HOST:$KEYSTONE_SERVICE_PORT/v$IDENTITY_API_VERSION" \
             --adminurl "$KEYSTONE_AUTH_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_AUTH_PORT/v$IDENTITY_API_VERSION" \

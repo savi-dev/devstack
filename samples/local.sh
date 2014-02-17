@@ -46,7 +46,7 @@ done
 # ---------------
 
 # Get OpenStack admin auth
-source $TOP_DIR/openrc admin admin
+source $TOP_DIR/openrc admin admin $REGION_NAME
 
 # Name of new flavor
 # set in ``localrc`` with ``DEFAULT_INSTANCE_TYPE=m1.micro``
@@ -62,6 +62,14 @@ fi
 # ----------
 
 # Add tcp/22 and icmp to default security group
+source $TOP_DIR/openrc admin demo1 $REGION_NAME
+nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
+nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
+source $TOP_DIR/openrc admin demo2 $REGION_NAME
 nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
 nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
 
+source $TOP_DIR/localrc
+sudo ip address add $PUBLIC_NETWORK_GATEWAY/24 dev $PUBLIC_BRIDGE
+sudo ip route add $FIXED_RANGE_DEMO1 via $STARTING_FLOATING_IP
+sudo ip route add $FIXED_RANGE_DEMO2 via $STARTING_FLOATING_IP

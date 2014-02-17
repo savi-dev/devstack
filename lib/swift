@@ -493,9 +493,9 @@ function create_swift_accounts() {
         SWIFT_SERVICE=$(keystone service-create --name=swift --type="object-store" \
             --description="Swift Service" | grep " id " | get_field 2)
         keystone endpoint-create \
-            --region RegionOne \
+            --region $REGION_NAME \
             --service_id $SWIFT_SERVICE \
-            --publicurl "http://$SERVICE_HOST:8080/v1/AUTH_\$(tenant_id)s" \
+            --publicurl "http://$PUBLIC_SERVICE_HOST:8080/v1/AUTH_\$(tenant_id)s" \
             --adminurl "http://$SERVICE_HOST:8080" \
             --internalurl "http://$SERVICE_HOST:8080/v1/AUTH_\$(tenant_id)s"
     fi

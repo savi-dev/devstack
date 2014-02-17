@@ -44,6 +44,7 @@ NOVA_API_PASTE_INI=${NOVA_API_PASTE_INI:-$NOVA_CONF_DIR/api-paste.ini}
 
 # Public facing bits
 NOVA_SERVICE_HOST=${NOVA_SERVICE_HOST:-$SERVICE_HOST}
+NOVA_PUBLIC_SERVICE_HOST=${NOVA_PUBLIC_SERVICE_HOST:-$PUBLIC_SERVICE_HOST}
 NOVA_SERVICE_PORT=${NOVA_SERVICE_PORT:-8774}
 NOVA_SERVICE_PORT_INT=${NOVA_SERVICE_PORT_INT:-18774}
 NOVA_SERVICE_PROTOCOL=${NOVA_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
@@ -331,9 +332,9 @@ create_nova_accounts() {
                 --description="Nova Compute Service" \
                 | grep " id " | get_field 2)
             keystone endpoint-create \
-                --region RegionOne \
+                --region $REGION_NAME \
                 --service_id $NOVA_SERVICE \
-                --publicurl "$NOVA_SERVICE_PROTOCOL://$NOVA_SERVICE_HOST:$NOVA_SERVICE_PORT/v2/\$(tenant_id)s" \
+                --publicurl "$NOVA_SERVICE_PROTOCOL://$NOVA_PUBLIC_SERVICE_HOST:$NOVA_SERVICE_PORT/v2/\$(tenant_id)s" \
                 --adminurl "$NOVA_SERVICE_PROTOCOL://$NOVA_SERVICE_HOST:$NOVA_SERVICE_PORT/v2/\$(tenant_id)s" \
                 --internalurl "$NOVA_SERVICE_PROTOCOL://$NOVA_SERVICE_HOST:$NOVA_SERVICE_PORT/v2/\$(tenant_id)s"
             NOVA_V3_SERVICE=$(keystone service-create \
@@ -342,9 +343,9 @@ create_nova_accounts() {
                 --description="Nova Compute Service V3" \
                 | grep " id " | get_field 2)
             keystone endpoint-create \
-                --region RegionOne \
+                --region $REGION_NAME \
                 --service_id $NOVA_V3_SERVICE \
-                --publicurl "$NOVA_SERVICE_PROTOCOL://$NOVA_SERVICE_HOST:$NOVA_SERVICE_PORT/v3" \
+                --publicurl "$NOVA_SERVICE_PROTOCOL://$NOVA_PUBLIC_SERVICE_HOST:$NOVA_SERVICE_PORT/v3" \
                 --adminurl "$NOVA_SERVICE_PROTOCOL://$NOVA_SERVICE_HOST:$NOVA_SERVICE_PORT/v3" \
                 --internalurl "$NOVA_SERVICE_PROTOCOL://$NOVA_SERVICE_HOST:$NOVA_SERVICE_PORT/v3"
         fi

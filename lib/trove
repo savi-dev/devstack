@@ -61,9 +61,9 @@ create_trove_accounts() {
                 --description="Trove Service" \
                 | grep " id " | get_field 2)
             keystone endpoint-create \
-                --region RegionOne \
+                --region $REGION_NAME \
                 --service_id $TROVE_SERVICE \
-                --publicurl "http://$SERVICE_HOST:8779/v1.0/\$(tenant_id)s" \
+                --publicurl "http://$PUBLIC_SERVICE_HOST:8779/v1.0/\$(tenant_id)s" \
                 --adminurl "http://$SERVICE_HOST:8779/v1.0/\$(tenant_id)s" \
                 --internalurl "http://$SERVICE_HOST:8779/v1.0/\$(tenant_id)s"
         fi

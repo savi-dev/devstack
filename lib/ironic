@@ -40,6 +40,7 @@ IRONIC_BIN_DIR=$(get_python_exec_prefix)
 # Ironic connection info.  Note the port must be specified.
 IRONIC_SERVICE_PROTOCOL=http
 IRONIC_HOSTPORT=${IRONIC_HOSTPORT:-$SERVICE_HOST:6385}
+PUBLIC_IRONIC_HOSTPORT=${PUBLIC_IRONIC_HOSTPORT:-$PUBLIC_SERVICE_HOST:6385}
 
 
 # Functions
@@ -146,9 +147,9 @@ create_ironic_accounts() {
                 --description="Ironic baremetal provisioning service" \
                 | grep " id " | get_field 2)
             keystone endpoint-create \
-                --region RegionOne \
+                --region $REGION_NAME \
                 --service_id $IRONIC_SERVICE \
-                --publicurl "$IRONIC_SERVICE_PROTOCOL://$IRONIC_HOSTPORT" \
+                --publicurl "$IRONIC_SERVICE_PROTOCOL://$PUBLIC_IRONIC_HOSTPORT" \
                 --adminurl "$IRONIC_SERVICE_PROTOCOL://$IRONIC_HOSTPORT" \
                 --internalurl "$IRONIC_SERVICE_PROTOCOL://$IRONIC_HOSTPORT"
         fi

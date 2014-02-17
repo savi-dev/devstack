@@ -1,0 +1,232 @@
+# lib/janus
+# Functions to control the configuration and operation of the janus service
+# <do not include this template file in ``stack.sh``!>
+
+# Dependencies:
+# ``functions`` file
+# ``SERVICE_{TENANT_NAME|PASSWORD}`` must be defined
+# <list other global vars that are assumed to be defined>
+
+# ``stack.sh`` calls the entry points in this order:
+#
+# install_janus
+# configure_janus
+# init_janus
+# start_janus
+# stop_janus
+# cleanup_janus
+
+# Save trace setting
+XTRACE=$(set +o | grep xtrace)
+set +o xtrace
+
+
+# Defaults
+# --------
+
+# <define global variables here that belong to this project>
+
+# Set up default directories
+JANUS_DIR=$DEST/janus
+JANUSCLIENT_DIR=$DEST/python-janusclient
+JANUS_CONF_DIR=${JANUS_CONF_DIR:-/etc/janus}
+JANUS_CONF=$JANUS_CONF_DIR/janus.conf
+JANUSCLIENT_DIR=$DEST/python-janusclient
+
+# Support entry points installation of console scripts
+if [[ -d $JANUS_DIR/bin ]]; then
+    JANUS_BIN_DIR=$JANUS_DIR/bin
+else
+    JANUS_BIN_DIR=/usr/local/bin
+fi
+
+# Glance connection info.  Note the port must be specified.
+JANUS_HOST=${JANUS_HOST:-$SERVICE_HOST}
+JANUS_PORT=${JANUS_PORT:-8091}
+JANUS_SERVICE_HOST=${JANUS_SERVICE_HOST:-$HOST_IP}
+JANUS_SERVICE_PORT=${JANUS_SERVICE_PORT:-8081}
+JANUS_SERVICE_PROTOCOL=${JANUS_SERVICE_PROTOCOL:-http}
+JANUS_INSTALLED_APPS=${JANUS_INSTALLED_APPS:-janus.network,janus.novasch}
+JANUS_NETWORK_APPS=${JANUS_NETWORK_APPS:-janus.network.apps.tr_edge_isolation.TREdgeIsolation}
+JANUS_CONTROLLER_CACHE_TIMEOUT=${JANUS_CONTROLLER_CACHE_TIMEOUT:-360}
+CONF_REST_API=http://${SERVICE_HOST}:9976
+
+# Set Keystone interface configuration
+KEYSTONE_API_PORT=${KEYSTONE_API_PORT:-5000}
+KEYSTONE_AUTH_HOST=${KEYSTONE_AUTH_HOST:-$SERVICE_HOST}
+KEYSTONE_AUTH_PORT=${KEYSTONE_AUTH_PORT:-35357}
+KEYSTONE_AUTH_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
+KEYSTONE_SERVICE_HOST=${KEYSTONE_AUTH_HOST:-$SERVICE_HOST}
+KEYSTONE_SERVICE_PORT=${KEYSTONE_SERVICE_PORT:-5000}
+KEYSTONE_SERVICE_PROTOCOL=${KEYSTONE_SERVICE_PROTOCOL:-http}
+
+ADMIN_TENANT_NAME=${ADMIN_TENANT_NAME:-admin}
+
+RYU_DIR=$DEST/ryu
+# Ryu API Host
+JANUS_API_HOST=${JANUS_API_HOST:-127.0.0.1}
+RYU_API_HOST=${RYU_API_HOST:-127.0.0.1}
+# Ryu API Port
+JANUS_API_PORT=${JANUS_API_PORT:-8091}
+RYU_API_PORT=${RYU_API_PORT:-8090}
+# Ryu OFP Host
+RYU_OFP_HOST=${RYU_OFP_HOST:-127.0.0.1}
+# Ryu OFP Port
+RYU_OFP_PORT=${RYU_OFP_PORT:-6633}
+# Ryu Applications
+RYU_APPS=${RYU_APPS:-ryu.app.simple_isolation,ryu.app.rest}
+
+# configure_ryu can be called multiple times as neutron_pluing/ryu may call
+# this function for neutron-ryu-agent
+_RYU_CONFIGURED=${_RYU_CONFIGURED:-False}
+function configure_ryu() {
+    if [[ "$_RYU_CONFIGURED" == "False" ]]; then
+        setup_develop $RYU_DIR
+        _RYU_CONFIGURED=True
+    fi
+}
+
+function init_ryu() {
+    RYU_CONF_DIR=/etc/ryu
+    if [[ ! -d $RYU_CONF_DIR ]]; then
+        sudo mkdir -p $RYU_CONF_DIR
+    fi
+    sudo chown $STACK_USER $RYU_CONF_DIR
+    RYU_CONF=$RYU_CONF_DIR/ryu.conf
+    sudo rm -rf $RYU_CONF
+
+    # Ryu configuration
+    RYU_CONF_CONTENTS=${RYU_CONF_CONTENTS:-"
+--app_lists=$RYU_APPS
+--wsapi_host=$RYU_API_HOST
+--wsapi_port=$RYU_API_PORT
+--ofp_listen_host=$RYU_OFP_HOST
+--ofp_tcp_listen_port=$RYU_OFP_PORT
+--janus_host=$JANUS_API_HOST
+--janus_port=$JANUS_API_PORT
+--api_db_url=$BASE_SQL_CONN/janus?charset=utf8
+"}
+    echo "${RYU_CONF_CONTENTS}" > $RYU_CONF
+}
+
+# install_ryu can be called multiple times as neutron_pluing/ryu may call
+# this function for neutron-ryu-agent
+# Make this function idempotent and avoid cloning same repo many times
+# with RECLONE=yes
+_RYU_INSTALLED=${_RYU_INSTALLED:-False}
+function install_ryu() {
+    if [[ "$_RYU_INSTALLED" == "False" ]]; then
+        git_clone $RYU_REPO $RYU_DIR $RYU_BRANCH
+        _RYU_INSTALLED=True
+    fi
+}
+
+function start_ryu() {
+    screen_it ryu "cd $RYU_DIR && $RYU_DIR/bin/ryu-manager --flagfile $RYU_CONF"
+}
+
+function stop_ryu() {
+    :
+}
+
+# Entry Points
+# ------------
+
+# cleanup_janus() - Remove residual data files, anything left over from previous
+# runs that a clean run would need to clean up
+function cleanup_janus() {
+    # kill instances (nova)
+    # delete image files (glance)
+    # This function intentionally left blank
+    :
+}
+
+# configure_janus() - Set config files, create data dirs, etc
+function configure_janus() {
+    sudo pip install networkx
+    setup_develop $JANUS_DIR
+
+    if [[ ! -d $JANUS_CONF_DIR ]]; then
+        sudo mkdir -p $JANUS_CONF_DIR
+        sudo chown `whoami` $JANUS_CONF_DIR
+    fi
+
+    if [[ "$JANUS_CONF_DIR" != "$JANUS_DIR/etc" ]]; then
+        cp -p $JANUS_DIR/etc/janus-api.conf $JANUS_CONF
+        cp -p $JANUS_DIR/etc/policy.json $JANUS_CONF_DIR
+    fi
+
+    # Rewrite stock ``keystone.conf``
+    iniset $JANUS_CONF sql connection "$BASE_SQL_CONN/janus?charset=utf8"
+
+    iniset $JANUS_CONF filter:authtoken auth_host $KEYSTONE_AUTH_HOST
+    iniset $JANUS_CONF filter:authtoken auth_port $KEYSTONE_AUTH_PORT
+    iniset $JANUS_CONF filter:authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
+    iniset $JANUS_CONF filter:authtoken auth_uri $KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_SERVICE_PORT/
+    iniset $JANUS_CONF filter:authtoken auth_region $REGION_NAME
+    iniset $JANUS_CONF filter:authtoken admin_tenant_name $ADMIN_TENANT_NAME
+    iniset $JANUS_CONF filter:authtoken admin_user admin
+    iniset $JANUS_CONF filter:authtoken admin_password $ADMIN_PASSWORD
+
+    iniset $JANUS_CONF filter:authz auth_host $KEYSTONE_AUTH_HOST
+    iniset $JANUS_CONF filter:authz auth_port $KEYSTONE_AUTH_PORT
+    iniset $JANUS_CONF filter:authz auth_protocol $KEYSTONE_AUTH_PROTOCOL
+    iniset $JANUS_CONF filter:authz auth_uri $KEYSTONE_SERVICE_PROTOCOL://$GLANCE_REGISTRY_AUTH_HOST:$KEYSTONE_SERVICE_PORT/
+    iniset $JANUS_CONF filter:authz auth_region $REGION_NAME
+    iniset $JANUS_CONF filter:authz admin_tenant_name $SERVICE_TENANT_NAME
+    iniset $JANUS_CONF filter:authz admin_user glance
+    iniset $JANUS_CONF filter:authz admin_password $SERVICE_PASSWORD
+
+    iniset $JANUS_CONF network of_ctrl_host $RYU_API_HOST
+    iniset $JANUS_CONF network of_ctrl_port $RYU_API_PORT
+    iniset $JANUS_CONF network fv_api_port $RYU_FV_API_PORT
+    iniset $JANUS_CONF network fv_pass_file $RYU_FV_PASSFILE
+    iniset $JANUS_CONF network fv_slice_default_pass $RYU_FV_SLICE_PASS
+    iniset $JANUS_CONF network fv_default_slice $RYU_FV_DEFAULT_SLICE
+    iniset $JANUS_CONF network api_db_url "$BASE_SQL_CONN/janus?charset=utf8"
+    iniset $JANUS_CONF network apps $JANUS_NETWORK_APPS
+    iniset $JANUS_CONF network controller_cache_timeout $JANUS_CONTROLLER_CACHE_TIMEOUT
+
+    iniset $JANUS_CONF whale conf_rest_api $CONF_REST_API
+    configure_ryu
+}
+
+# configure_janus() - Set config files, create data dirs, etc
+function configure_janusclient() {
+    setup_develop $JANUSCLIENT_DIR
+}
+
+# init_janus() - Initialize databases, etc.
+function init_janus() {
+    iniset $NOVA_CONF DEFAULT janus_host "$JANUS_API_HOST"
+    iniset $NOVA_CONF DEFAULT janus_port "$JANUS_API_PORT"
+    recreate_database janus latin1
+    init_ryu
+}
+
+# install_janus() - Collect source and prepare
+function install_janus() {
+    git_clone $JANUS_REPO $JANUS_DIR $JANUS_BRANCH
+    install_ryu
+}
+
+# install_janusclient() - Collect source and prepare
+function install_janusclient() {
+    git_clone $JANUSCLIENT_REPO $JANUSCLIENT_DIR $JANUSCLIENT_BRANCH
+}
+
+# start_janus() - Start running processes, including screen
+function start_janus() {
+    echo_summary "Starting janus"
+    start_ryu
+    sleep 20
+    screen_it janus "cd $JANUS_DIR && $JANUS_DIR/bin/janus-init --config-file $JANUS_CONF"
+}
+
+# stop_janus() - Stop running processes (non-screen)
+function stop_janus() {
+    screen -S $SCREEN_NAME -p janus -X kill
+}
+
+# Restore xtrace
+$XTRACE

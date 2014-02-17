@@ -39,6 +39,7 @@ CINDER_API_PASTE_INI=$CINDER_CONF_DIR/api-paste.ini
 
 # Public facing bits
 CINDER_SERVICE_HOST=${CINDER_SERVICE_HOST:-$SERVICE_HOST}
+CINDER_PUBLIC_SERVICE_HOST=${CINDER_PUBLIC_SERVICE_HOST:-$PUBLIC_SERVICE_HOST}
 CINDER_SERVICE_PORT=${CINDER_SERVICE_PORT:-8776}
 CINDER_SERVICE_PORT_INT=${CINDER_SERVICE_PORT_INT:-18776}
 CINDER_SERVICE_PROTOCOL=${CINDER_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
@@ -353,9 +354,9 @@ create_cinder_accounts() {
                 --description="Cinder Volume Service" \
                 | grep " id " | get_field 2)
             keystone endpoint-create \
-                --region RegionOne \
+                --region $REGION_NAME \
                 --service_id $CINDER_SERVICE \
-                --publicurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v1/\$(tenant_id)s" \
+                --publicurl "$CINDER_SERVICE_PROTOCOL://$CINDER_PUBLIC_SERVICE_HOST:$CINDER_SERVICE_PORT/v1/\$(tenant_id)s" \
                 --adminurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v1/\$(tenant_id)s" \
                 --internalurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v1/\$(tenant_id)s"
             CINDER_V2_SERVICE=$(keystone service-create \
@@ -364,9 +365,9 @@ create_cinder_accounts() {
                 --description="Cinder Volume Service V2" \
                 | grep " id " | get_field 2)
             keystone endpoint-create \
-                --region RegionOne \
+                --region $REGION_NAME \
                 --service_id $CINDER_V2_SERVICE \
-                --publicurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v2/\$(tenant_id)s" \
+                --publicurl "$CINDER_SERVICE_PROTOCOL://$CINDER_PUBLIC_SERVICE_HOST:$CINDER_SERVICE_PORT/v2/\$(tenant_id)s" \
                 --adminurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v2/\$(tenant_id)s" \
                 --internalurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v2/\$(tenant_id)s"
 

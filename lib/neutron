@@ -68,8 +68,9 @@ set +o xtrace
 # Gateway and subnet defaults, in case they are not customized in localrc
 NETWORK_GATEWAY=${NETWORK_GATEWAY:-10.0.0.1}
 PUBLIC_NETWORK_GATEWAY=${PUBLIC_NETWORK_GATEWAY:-172.24.4.225}
-PRIVATE_SUBNET_NAME=${PRIVATE_SUBNET_NAME:-"private-subnet"}
-PUBLIC_SUBNET_NAME=${PUBLIC_SUBNET_NAME:-"public-subnet"}
+PRIVATE_SUBNET_NAME_DEMO1=${PRIVATE_SUBNET_NAME_DEMO1:-"demo1-subnet"}
+PRIVATE_SUBNET_NAME_DEMO2=${PRIVATE_SUBNET_NAME_DEMO2:-"demo2-subnet"}
+PUBLIC_SUBNET_NAME=${PUBLIC_SUBNET_NAME:-"ext-subnet"}
 
 # Set up default directories
 NEUTRON_DIR=$DEST/neutron
@@ -272,7 +273,7 @@ function create_nova_conf_neutron() {
     iniset $NOVA_CONF DEFAULT neutron_admin_auth_url "$KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_SERVICE_HOST:$KEYSTONE_AUTH_PORT/v2.0"
     iniset $NOVA_CONF DEFAULT neutron_auth_strategy "$Q_AUTH_STRATEGY"
     iniset $NOVA_CONF DEFAULT neutron_admin_tenant_name "$SERVICE_TENANT_NAME"
-    iniset $NOVA_CONF DEFAULT neutron_region_name "RegionOne"
+    iniset $NOVA_CONF DEFAULT neutron_region_name "$REGION_NAME"
     iniset $NOVA_CONF DEFAULT neutron_url "http://$Q_HOST:$Q_PORT"
 
     if [[ "$Q_USE_SECGROUP" == "True" ]]; then
@@ -320,9 +321,9 @@ function create_neutron_accounts() {
                 --description="Neutron Service" \
                 | grep " id " | get_field 2)
             keystone endpoint-create \
-                --region RegionOne \
+                --region $REGION_NAME \
                 --service_id $NEUTRON_SERVICE \
-                --publicurl "http://$SERVICE_HOST:9696/" \
+                --publicurl "http://$PUBLIC_SERVICE_HOST:9696/" \
                 --adminurl "http://$SERVICE_HOST:9696/" \
                 --internalurl "http://$SERVICE_HOST:9696/"
         fi
@@ -330,7 +331,8 @@ function create_neutron_accounts() {
 }
 
 function create_neutron_initial_network() {
-    TENANT_ID=$(keystone tenant-list | grep " demo " | get_field 1)
+    TENANT_ID_DEMO1=$(keystone tenant-list | grep " demo1 " | get_field 1)
+    TENANT_ID_DEMO2=$(keystone tenant-list | grep " demo2 " | get_field 1)
 
     # Create a small network
     # Since neutron command is executed in admin context at this point,
@@ -349,20 +351,25 @@ function create_neutron_initial_network() {
         sudo ifconfig $OVS_PHYSICAL_BRIDGE up
         sudo route add default gw $NETWORK_GATEWAY dev $OVS_PHYSICAL_BRIDGE
     else
-        NET_ID=$(neutron net-create --tenant_id $TENANT_ID "$PRIVATE_NETWORK_NAME" | grep ' id ' | get_field 2)
-        SUBNET_ID=$(neutron subnet-create --tenant_id $TENANT_ID --ip_version 4 --gateway $NETWORK_GATEWAY --name $PRIVATE_SUBNET_NAME $NET_ID $FIXED_RANGE | grep ' id ' | get_field 2)
+        NET_ID_DEMO1=$(neutron net-create --tenant_id $TENANT_ID_DEMO1 "$PRIVATE_NETWORK_NAME_DEMO1" | grep ' id ' | get_field 2)
+        SUBNET_ID_DEMO1=$(neutron subnet-create --tenant_id $TENANT_ID_DEMO1 --ip_version 4 --gateway $NETWORK_GATEWAY_DEMO1 --name $PRIVATE_SUBNET_NAME_DEMO1 --dns-nameserver $DNS_NAMESERVER $NET_ID_DEMO1 $FIXED_RANGE_DEMO1 | grep ' id ' | get_field 2)
+        NET_ID_DEMO2=$(neutron net-create --tenant_id $TENANT_ID_DEMO2 "$PRIVATE_NETWORK_NAME_DEMO2" | grep ' id ' | get_field 2)
+        SUBNET_ID_DEMO2=$(neutron subnet-create --tenant_id $TENANT_ID_DEMO2 --ip_version 4 --gateway $NETWORK_GATEWAY_DEMO2 --name $PRIVATE_SUBNET_NAME_DEMO2 --dns-nameserver $DNS_NAMESERVER $NET_ID_DEMO2 $FIXED_RANGE_DEMO2 | grep ' id ' | get_field 2)
     fi
 
     if [[ "$Q_L3_ENABLED" == "True" ]]; then
         # Create a router, and add the private subnet as one of its interfaces
-        if [[ "$Q_L3_ROUTER_PER_TENANT" == "True" ]]; then
+        #if [[ "$Q_L3_ROUTER_PER_TENANT" == "True" ]]; then
             # create a tenant-owned router.
-            ROUTER_ID=$(neutron router-create --tenant_id $TENANT_ID $Q_ROUTER_NAME | grep ' id ' | get_field 2)
-        else
+            #ROUTER_ID=$(neutron router-create --tenant_id $TENANT_ID $Q_ROUTER_NAME | grep ' id ' | get_field 2)
+            #ROUTER_ID=$(neutron router-create --tenant_id $TENANT_ID $Q_ROUTER_NAME | grep ' id ' | get_field 2)
+        #else
             # Plugin only supports creating a single router, which should be admin owned.
-            ROUTER_ID=$(neutron router-create $Q_ROUTER_NAME | grep ' id ' | get_field 2)
-        fi
-        neutron router-interface-add $ROUTER_ID $SUBNET_ID
+            #ROUTER_ID=$(neutron router-create $Q_ROUTER_NAME | grep ' id ' | get_field 2)
+        #fi
+        ROUTER_ID=$(neutron router-create $Q_ROUTER_NAME | grep ' id ' | get_field 2)
+        neutron router-interface-add $ROUTER_ID $SUBNET_ID_DEMO1
+        neutron router-interface-add $ROUTER_ID $SUBNET_ID_DEMO2
         # Create an external network, and a subnet. Configure the external network as router gw
         EXT_NET_ID=$(neutron net-create "$PUBLIC_NETWORK_NAME" -- --router:external=True | grep ' id ' | get_field 2)
         EXT_GW_IP=$(neutron subnet-create --ip_version 4 ${Q_FLOATING_ALLOCATION_POOL:+--allocation-pool $Q_FLOATING_ALLOCATION_POOL} --gateway $PUBLIC_NETWORK_GATEWAY --name $PUBLIC_SUBNET_NAME $EXT_NET_ID $FLOATING_RANGE -- --enable_dhcp=False | grep 'gateway_ip' | get_field 2)
@@ -372,10 +379,10 @@ function create_neutron_initial_network() {
             # logic is specific to using the l3-agent for l3
             if is_neutron_ovs_base_plugin && [[ "$Q_USE_NAMESPACE" = "True" ]]; then
                 CIDR_LEN=${FLOATING_RANGE#*/}
-                sudo ip addr add $EXT_GW_IP/$CIDR_LEN dev $PUBLIC_BRIDGE
-                sudo ip link set $PUBLIC_BRIDGE up
+                #sudo ip addr add $EXT_GW_IP/$CIDR_LEN dev $PUBLIC_BRIDGE
+                #sudo ip link set $PUBLIC_BRIDGE up
                 ROUTER_GW_IP=`neutron port-list -c fixed_ips -c device_owner | grep router_gateway | awk -F '"' '{ print $8; }'`
-                sudo route add -net $FIXED_RANGE gw $ROUTER_GW_IP
+                #sudo route add -net $FIXED_RANGE gw $ROUTER_GW_IP
             fi
             if [[ "$Q_USE_NAMESPACE" == "False" ]]; then
                 # Explicitly set router id in l3 agent configuration
@@ -762,6 +769,7 @@ function _neutron_setup_keystone() {
     iniset $conf_file $section admin_tenant_name $SERVICE_TENANT_NAME
     iniset $conf_file $section admin_user $Q_ADMIN_USERNAME
     iniset $conf_file $section admin_password $SERVICE_PASSWORD
+    iniset $conf_file $section auth_region $REGION_NAME
     if [[ -z $skip_auth_cache ]]; then
         iniset $conf_file $section signing_dir $NEUTRON_AUTH_CACHE_DIR
         # Create cache dir
@@ -794,14 +802,17 @@ function setup_neutron_debug() {
     if [[ "$Q_USE_DEBUG_COMMAND" == "True" ]]; then
         public_net_id=`_get_net_id $PUBLIC_NETWORK_NAME`
         neutron-debug --os-tenant-name admin --os-username admin --os-password $ADMIN_PASSWORD probe-create --device-owner compute $public_net_id
-        private_net_id=`_get_net_id $PRIVATE_NETWORK_NAME`
+        private_net_id=`_get_net_id $PRIVATE_NETWORK_NAME_DEMO1`
+        neutron-debug --os-tenant-name admin --os-username admin --os-password $ADMIN_PASSWORD probe-create --device-owner compute $private_net_id
+        private_net_id=`_get_net_id $PRIVATE_NETWORK_NAME_DEMO2`
         neutron-debug --os-tenant-name admin --os-username admin --os-password $ADMIN_PASSWORD probe-create --device-owner compute $private_net_id
     fi
 }
 
 function teardown_neutron_debug() {
     delete_probe $PUBLIC_NETWORK_NAME
-    delete_probe $PRIVATE_NETWORK_NAME
+    delete_probe $PRIVATE_NETWORK_NAME_DEMO1
+    delete_probe $PRIVATE_NETWORK_NAME_DEMO2
 }
 
 function _get_net_id() {
