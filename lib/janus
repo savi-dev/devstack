@@ -200,6 +200,7 @@ function configure_janusclient() {
 function init_janus() {
     iniset $NOVA_CONF DEFAULT janus_host "$JANUS_API_HOST"
     iniset $NOVA_CONF DEFAULT janus_port "$JANUS_API_PORT"
+    iniset $NOVA_CONF DEFAULT libvirt_ovs_janus_api_host "$JANUS_API_HOST:$JANUS_API_PORT"
     recreate_database janus latin1
     init_ryu
 }
