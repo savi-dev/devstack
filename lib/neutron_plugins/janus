@@ -11,6 +11,9 @@ source $TOP_DIR/lib/neutron_thirdparty/janus      # for configuration value
 function neutron_plugin_create_nova_conf() {
     _neutron_ovs_base_configure_nova_vif_driver
     iniset $NOVA_CONF DEFAULT libvirt_ovs_integration_bridge "$OVS_BRIDGE"
+    iniset $NOVA_CONF DEFAULT libvirt_ovs_janus_api_host "$JANUS_API_HOST:$JANUS_API_PORT"
+    iniset $NOVA_CONF DEFAULT janus_host "$JANUS_API_HOST"
+    iniset $NOVA_CONF DEFAULT janus_port "$JANUS_API_PORT"
 }
 
 function neutron_plugin_install_agent_packages() {
@@ -18,7 +21,8 @@ function neutron_plugin_install_agent_packages() {
 
     # neutron_ryu_agent requires ryu module
     # install_package $(get_packages "ryu")
-    # install_janus
+    install_janus
+    init_janus
     # configure_janus
 }
 
@@ -27,6 +31,8 @@ function neutron_plugin_configure_common() {
     Q_PLUGIN_CONF_FILENAME=janus.ini
     Q_DB_NAME="ovs_neutron"
     Q_PLUGIN_CLASS="neutron.plugins.janus.janus_neutron_plugin.JanusNeutronPluginV2"
+    iniset /$Q_PLUGIN_CONF_PATH/$Q_PLUGIN_CONF_FILENAME ovs openflow_rest_api $JANUS_API_HOST:$JANUS_API_PORT
+    iniset /$Q_PLUGIN_CONF_PATH/$Q_PLUGIN_CONF_FILENAME ovs openflow_controller $RYU_OFP_HOST:$RYU_OFP_PORT
 }
 
 function neutron_plugin_configure_debug_command() {
@@ -46,6 +52,9 @@ function neutron_plugin_configure_l3_agent() {
 function neutron_plugin_configure_plugin_agent() {
     # Set up integration bridge
     _neutron_ovs_base_setup_bridge $OVS_BRIDGE
+    if [ -n "$DATAPATH_ID" ]; then
+       neutron_ovs_base_set_datapath_id $OVS_BRIDGE $DATAPATH_ID
+    fi
     if [ -n "$JANUS_INTERNAL_INTERFACE" ]; then
         sudo ovs-vsctl --no-wait -- --may-exist add-port $OVS_BRIDGE $JANUS_INTERNAL_INTERFACE
     fi

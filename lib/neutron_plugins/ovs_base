@@ -20,6 +20,12 @@ function _neutron_ovs_base_setup_bridge() {
     sudo ovs-vsctl --no-wait br-set-external-id $bridge bridge-id $bridge
 }
 
+function neutron_ovs_base_set_datapath_id() {
+    local bridge=$1
+    local datapath_id=$2
+    sudo ovs-vsctl set bridge $bridge other-config:datapath-id=$datapath_id
+}
+
 function neutron_ovs_base_cleanup() {
     # remove all OVS ports that look like Neutron created ports
     for port in $(sudo ovs-vsctl list port | grep -o -e tap[0-9a-f\-]* -e q[rg]-[0-9a-f\-]*); do
