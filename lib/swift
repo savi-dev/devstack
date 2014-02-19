@@ -485,13 +485,19 @@ function create_swift_accounts() {
     SERVICE_TENANT=$(keystone tenant-list | awk "/ $SERVICE_TENANT_NAME / { print \$2 }")
     ADMIN_ROLE=$(keystone role-list | awk "/ admin / { print \$2 }")
 
+    if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
     SWIFT_USER=$(keystone user-create --name=swift --pass="$SERVICE_PASSWORD" \
         --tenant_id $SERVICE_TENANT --email=swift@example.com | grep " id " | get_field 2)
     keystone user-role-add --tenant-id $SERVICE_TENANT --user-id $SWIFT_USER --role-id $ADMIN_ROLE
+    fi
 
     if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+        if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
         SWIFT_SERVICE=$(keystone service-create --name=swift --type="object-store" \
             --description="Swift Service" | grep " id " | get_field 2)
+        else
+            SWIFT_SERVICE=$(keystone service-get swift | grep " id " | get_field 2)
+        fi
         keystone endpoint-create \
             --region $REGION_NAME \
             --service_id $SWIFT_SERVICE \
@@ -500,6 +506,7 @@ function create_swift_accounts() {
             --internalurl "http://$SERVICE_HOST:8080/v1/AUTH_\$(tenant_id)s"
     fi
 
+    if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
     SWIFT_TENANT_TEST1=$(keystone tenant-create --name=swifttenanttest1 | grep " id " | get_field 2)
     SWIFT_USER_TEST1=$(keystone user-create --name=swiftusertest1 --pass=testing --email=test@example.com | grep " id " | get_field 2)
     keystone user-role-add --user-id $SWIFT_USER_TEST1 --role-id $ADMIN_ROLE --tenant-id $SWIFT_TENANT_TEST1
@@ -510,7 +517,9 @@ function create_swift_accounts() {
     SWIFT_TENANT_TEST2=$(keystone tenant-create --name=swifttenanttest2 | grep " id " | get_field 2)
     SWIFT_USER_TEST2=$(keystone user-create --name=swiftusertest2 --pass=testing2 --email=test2@example.com | grep " id " | get_field 2)
     keystone user-role-add --user-id $SWIFT_USER_TEST2 --role-id $ADMIN_ROLE --tenant-id $SWIFT_TENANT_TEST2
+    fi
 }
+
 
 # init_swift() - Initialize rings
 function init_swift() {

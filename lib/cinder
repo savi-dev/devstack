@@ -337,6 +337,7 @@ create_cinder_accounts() {
 
     # Cinder
     if [[ "$ENABLED_SERVICES" =~ "c-api" ]]; then
+        if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
         CINDER_USER=$(keystone user-create \
             --name=cinder \
             --pass="$SERVICE_PASSWORD" \
@@ -347,30 +348,38 @@ create_cinder_accounts() {
             --tenant-id $SERVICE_TENANT \
             --user-id $CINDER_USER \
             --role-id $ADMIN_ROLE
+        fi
         if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+            if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
             CINDER_SERVICE=$(keystone service-create \
                 --name=cinder \
                 --type=volume \
                 --description="Cinder Volume Service" \
                 | grep " id " | get_field 2)
+            else
+               CINDER_SERVICE=$(keystone service-get cinder | grep " id " | get_field 2)
+            fi
             keystone endpoint-create \
                 --region $REGION_NAME \
                 --service_id $CINDER_SERVICE \
                 --publicurl "$CINDER_SERVICE_PROTOCOL://$CINDER_PUBLIC_SERVICE_HOST:$CINDER_SERVICE_PORT/v1/\$(tenant_id)s" \
                 --adminurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v1/\$(tenant_id)s" \
                 --internalurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v1/\$(tenant_id)s"
+            if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
             CINDER_V2_SERVICE=$(keystone service-create \
-                --name=cinder \
+                --name=cinderv2 \
                 --type=volumev2 \
                 --description="Cinder Volume Service V2" \
                 | grep " id " | get_field 2)
+            else
+               CINDER_V2_SERVICE=$(keystone service-get cinderv2 | grep " id " | get_field 2)
+            fi
             keystone endpoint-create \
                 --region $REGION_NAME \
                 --service_id $CINDER_V2_SERVICE \
                 --publicurl "$CINDER_SERVICE_PROTOCOL://$CINDER_PUBLIC_SERVICE_HOST:$CINDER_SERVICE_PORT/v2/\$(tenant_id)s" \
                 --adminurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v2/\$(tenant_id)s" \
                 --internalurl "$CINDER_SERVICE_PROTOCOL://$CINDER_SERVICE_HOST:$CINDER_SERVICE_PORT/v2/\$(tenant_id)s"
-
         fi
     fi
 }

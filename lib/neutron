@@ -304,6 +304,7 @@ function create_neutron_accounts() {
     ADMIN_ROLE=$(keystone role-list | awk "/ admin / { print \$2 }")
 
     if [[ "$ENABLED_SERVICES" =~ "q-svc" ]]; then
+        if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
         NEUTRON_USER=$(keystone user-create \
             --name=neutron \
             --pass="$SERVICE_PASSWORD" \
@@ -314,12 +315,17 @@ function create_neutron_accounts() {
             --tenant-id $SERVICE_TENANT \
             --user-id $NEUTRON_USER \
             --role-id $ADMIN_ROLE
+        fi
         if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+            if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
             NEUTRON_SERVICE=$(keystone service-create \
                 --name=neutron \
                 --type=network \
                 --description="Neutron Service" \
                 | grep " id " | get_field 2)
+            else
+               NEUTRON_SERVICE=$(keystone service-get neutron | grep " id " | get_field 2)
+            fi
             keystone endpoint-create \
                 --region $REGION_NAME \
                 --service_id $NEUTRON_SERVICE \

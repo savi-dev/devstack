@@ -45,14 +45,18 @@ MEMBER_ROLE=$(keystone role-list | awk "/ Member / { print \$2 }")
 # The admin role in swift allows a user to act as an admin for their tenant,
 # but ResellerAdmin is needed for a user to act as any tenant. The name of this
 # role is also configurable in swift-proxy.conf
+
+if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
 RESELLER_ROLE=$(get_id keystone role-create --name=ResellerAdmin)
 # Service role, so service users do not have to be admins
 SERVICE_ROLE=$(get_id keystone role-create --name=service)
+fi
 
 
 # Services
 # --------
 
+if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
 if [[ "$ENABLED_SERVICES" =~ "n-api" ]] && [[ "$ENABLED_SERVICES" =~ "s-proxy" || "$ENABLED_SERVICES" =~ "swift" ]]; then
     NOVA_USER=$(keystone user-list | awk "/ nova / { print \$2 }")
     # Nova needs ResellerAdmin role to download images when accessing
@@ -62,9 +66,11 @@ if [[ "$ENABLED_SERVICES" =~ "n-api" ]] && [[ "$ENABLED_SERVICES" =~ "s-proxy" |
         --user-id $NOVA_USER \
         --role-id $RESELLER_ROLE
 fi
+fi
 
 # Heat
 if [[ "$ENABLED_SERVICES" =~ "heat" ]]; then
+    if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
     HEAT_USER=$(get_id keystone user-create --name=heat \
         --pass="$SERVICE_PASSWORD" \
         --tenant_id $SERVICE_TENANT \
@@ -74,7 +80,9 @@ if [[ "$ENABLED_SERVICES" =~ "heat" ]]; then
         --role-id $SERVICE_ROLE
     # heat_stack_user role is for users created by Heat
     keystone role-create --name heat_stack_user
+    fi
     if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+        if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
         HEAT_CFN_SERVICE=$(get_id keystone service-create \
             --name=heat-cfn \
             --type=cloudformation \
@@ -89,6 +97,9 @@ if [[ "$ENABLED_SERVICES" =~ "heat" ]]; then
             --name=heat \
             --type=orchestration \
             --description="Heat Service")
+        else
+            HEAT_SERVICE=$(get_id keystone service-get heat)
+        fi
         keystone endpoint-create \
             --region $REGION_NAME \
             --service_id $HEAT_SERVICE \
@@ -100,6 +111,7 @@ fi
 
 # Glance
 if [[ "$ENABLED_SERVICES" =~ "g-api" ]]; then
+    if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
     GLANCE_USER=$(get_id keystone user-create \
         --name=glance \
         --pass="$SERVICE_PASSWORD" \
@@ -109,11 +121,16 @@ if [[ "$ENABLED_SERVICES" =~ "g-api" ]]; then
         --tenant-id $SERVICE_TENANT \
         --user-id $GLANCE_USER \
         --role-id $ADMIN_ROLE
+    fi
     if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+        if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
         GLANCE_SERVICE=$(get_id keystone service-create \
             --name=glance \
             --type=image \
             --description="Glance Image Service")
+        else
+            GLANCE_SERVICE=$(get_id keystone service-get glance)
+        fi
         keystone endpoint-create \
             --region $REGION_NAME \
             --service_id $GLANCE_SERVICE \
@@ -125,6 +142,8 @@ fi
 
 # Ceilometer
 if [[ "$ENABLED_SERVICES" =~ "ceilometer" ]]; then
+
+    if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
     CEILOMETER_USER=$(get_id keystone user-create --name=ceilometer \
         --pass="$SERVICE_PASSWORD" \
         --tenant_id $SERVICE_TENANT \
@@ -136,11 +155,16 @@ if [[ "$ENABLED_SERVICES" =~ "ceilometer" ]]; then
     keystone user-role-add --tenant-id $SERVICE_TENANT \
         --user-id $CEILOMETER_USER \
         --role-id $RESELLER_ROLE
+    fi
     if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+        if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
         CEILOMETER_SERVICE=$(get_id keystone service-create \
             --name=ceilometer \
             --type=metering \
             --description="Ceilometer Service")
+        else
+            CEILOMETER_SERVICE=$(get_id keystone service-get ceilometer)
+        fi
         keystone endpoint-create \
             --region $REGION_NAME \
             --service_id $CEILOMETER_SERVICE \
@@ -153,10 +177,14 @@ fi
 # EC2
 if [[ "$ENABLED_SERVICES" =~ "n-api" ]]; then
     if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+        if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
         EC2_SERVICE=$(get_id keystone service-create \
             --name=ec2 \
             --type=ec2 \
             --description="EC2 Compatibility Layer")
+        else
+            EC2_SERVICE=$(get_id keystone service-get ec2)
+        fi
         keystone endpoint-create \
             --region $REGION_NAME \
             --service_id $EC2_SERVICE \
@@ -169,10 +197,14 @@ fi
 # S3
 if [[ "$ENABLED_SERVICES" =~ "n-obj" || "$ENABLED_SERVICES" =~ "swift3" ]]; then
     if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+        if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
         S3_SERVICE=$(get_id keystone service-create \
             --name=s3 \
             --type=s3 \
             --description="S3")
+        else
+            S3_SERVICE=$(get_id keystone service-get s3)
+        fi
         keystone endpoint-create \
             --region $REGION_NAME \
             --service_id $S3_SERVICE \
@@ -185,6 +217,7 @@ fi
 if [[ "$ENABLED_SERVICES" =~ "tempest" ]]; then
     # Tempest has some tests that validate various authorization checks
     # between two regular users in separate tenants
+    if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
     ALT_DEMO_TENANT=$(get_id keystone tenant-create \
         --name=alt_demo)
     ALT_DEMO_USER=$(get_id keystone user-create \
@@ -195,4 +228,5 @@ if [[ "$ENABLED_SERVICES" =~ "tempest" ]]; then
         --tenant-id $ALT_DEMO_TENANT \
         --user-id $ALT_DEMO_USER \
         --role-id $MEMBER_ROLE
+    fi
 fi

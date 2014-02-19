@@ -652,6 +652,9 @@ if is_service_enabled key; then
     if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
        install_keystone
        configure_keystone
+    else
+       export OS_IDENTITY_API_VERSION=${IDENTITY_API_VERSION:-2.0}
+       export OS_AUTH_URL=$SERVICE_PROTOCOL://$KEYSTONE_AUTH_HOST:5000/v${OS_IDENTITY_API_VERSION}
     fi
 fi
 
@@ -876,6 +879,8 @@ if is_service_enabled key; then
        echo_summary "Starting Keystone"
        init_keystone
        start_keystone
+    else
+       export KEYSTONE_AUTH_HOST=$KEYSTONE_AUTH_HOST
     fi
 
     # Set up a temporary admin URI for Keystone
@@ -891,7 +896,8 @@ if is_service_enabled key; then
     export OS_SERVICE_TOKEN=$SERVICE_TOKEN
     export OS_SERVICE_ENDPOINT=$SERVICE_ENDPOINT
     #export PUBLIC_SERVICE_HOST=${PUBLIC_SERVICE_HOST:-$SERVICE_HOST}
-    if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
+    #if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
+       delete_all_endpoints_in_region
        create_keystone_accounts
        create_nova_accounts
        create_cinder_accounts
@@ -904,7 +910,7 @@ if is_service_enabled key; then
        if is_service_enabled swift || is_service_enabled s-proxy; then
          create_swift_accounts
        fi
-    fi
+    #fi
     SERVICE_ENDPOINT=$KEYSTONE_AUTH_PROTOCOL://$KEYSTONE_AUTH_HOST:$KEYSTONE_AUTH_PORT/v2.0
 
     # ``keystone_data.sh`` creates services, admin and demo users, and roles.
@@ -922,6 +928,7 @@ if is_service_enabled key; then
     export OS_TENANT_NAME=admin
     export OS_USERNAME=admin
     export OS_PASSWORD=$ADMIN_PASSWORD
+    export OS_REGION_NAME=$REGION_NAME
     unset OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
 fi
 
