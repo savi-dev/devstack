@@ -31,7 +31,7 @@ DEST=${DEST:-/opt/stack}
 # ``demo``)
 
 # Get OpenStack auth
-source $TOP_DIR/openrc
+source $TOP_DIR/openrc admin demo1 $REGION_NAME $KEYSTONE_AUTH_HOST
 
 # Add first keypair found in localhost:$HOME/.ssh
 for i in $HOME/.ssh/id_rsa.pub $HOME/.ssh/id_dsa.pub; do
@@ -46,7 +46,7 @@ done
 # ---------------
 
 # Get OpenStack admin auth
-source $TOP_DIR/openrc admin admin $REGION_NAME
+source $TOP_DIR/openrc admin admin $REGION_NAME $KEYSTONE_AUTH_HOST
 
 # Name of new flavor
 # set in ``localrc`` with ``DEFAULT_INSTANCE_TYPE=m1.micro``
@@ -62,14 +62,19 @@ fi
 # ----------
 
 # Add tcp/22 and icmp to default security group
-source $TOP_DIR/openrc admin demo1 $REGION_NAME
+source $TOP_DIR/openrc admin demo1 $REGION_NAME $KEYSTONE_AUTH_HOST
 nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
 nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
-source $TOP_DIR/openrc admin demo2 $REGION_NAME
+source $TOP_DIR/openrc admin demo2 $REGION_NAME $KEYSTONE_AUTH_HOST
 nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
 nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
 
 source $TOP_DIR/localrc
+PUBLIC_BRIDGE=${PUBLIC_BRIDGE:-br-ex}
+echo sudo ip address add $PUBLIC_NETWORK_GATEWAY/24 dev $PUBLIC_BRIDGE
+echo sudo ip route add $FIXED_RANGE_DEMO1 via $STARTING_FLOATING_IP
+echo sudo ip route add $FIXED_RANGE_DEMO2 via $STARTING_FLOATING_IP
 sudo ip address add $PUBLIC_NETWORK_GATEWAY/24 dev $PUBLIC_BRIDGE
 sudo ip route add $FIXED_RANGE_DEMO1 via $STARTING_FLOATING_IP
 sudo ip route add $FIXED_RANGE_DEMO2 via $STARTING_FLOATING_IP
+

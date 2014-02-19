@@ -948,7 +948,7 @@ fi
 # Glance
 # ------
 
-if is_service_enabled g-reg; then
+if is_service_enabled g-reg g-api; then
     echo_summary "Configuring Glance"
     init_glance
 fi
@@ -1222,18 +1222,18 @@ fi
 #  * **oneiric**: http://uec-images.ubuntu.com/oneiric/current/oneiric-server-cloudimg-amd64.tar.gz
 #  * **precise**: http://uec-images.ubuntu.com/precise/current/precise-server-cloudimg-amd64.tar.gz
 
-if is_service_enabled g-reg; then
+if is_service_enabled g-api; then
     TOKEN=$(keystone token-get | grep ' id ' | get_field 2)
 
     if is_baremetal; then
         echo_summary "Creating and uploading baremetal images"
 
         # build and upload separate deploy kernel & ramdisk
-        upload_baremetal_deploy $TOKEN
+        upload_baremetal_deploy $TOKEN $REGION_NAME
 
         # upload images, separating out the kernel & ramdisk for PXE boot
         for image_url in ${IMAGE_URLS//,/ }; do
-            upload_baremetal_image $image_url $TOKEN
+            upload_baremetal_image $image_url $TOKEN $REGION_NAME
         done
     else
         echo_summary "Uploading images"
@@ -1244,7 +1244,7 @@ if is_service_enabled g-reg; then
         fi
 
         for image_url in ${IMAGE_URLS//,/ }; do
-            upload_image $image_url $TOKEN
+            upload_image $image_url $TOKEN $REGION_NAME
         done
     fi
 fi

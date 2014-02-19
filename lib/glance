@@ -41,6 +41,13 @@ GLANCE_CACHE_CONF=$GLANCE_CONF_DIR/glance-cache.conf
 GLANCE_POLICY_JSON=$GLANCE_CONF_DIR/policy.json
 GLANCE_SCHEMA_JSON=$GLANCE_CONF_DIR/schema-image.json
 
+GLANCE_REGISTRY_PORT=${GLANCE_REGISTRY_PORT:-9191}
+GLANCE_REGISTRY_HOST=${GLANCE_REGISTRY_HOST:-$SERVICE_HOST}
+GLANCE_API_FLAVOR=${GLANCE_API_FLAVOR:-keystone+cachemanagement}
+GLANCE_CACHE_MAX_SIZE=${GLANCE_CACHE_MAX_SIZE:-1000000000}
+GLANCE_CACHE_PRUNER_INTERVAL=${GLANCE_CACHE_PRUNER_INTERVAL:-/5}
+GLANCE_CACHE_CLEANER_INTERVAL=${GLANCE_CACHE_CLEANER_INTERVAL:-/10}
+
 # Support entry points installation of console scripts
 if [[ -d $GLANCE_DIR/bin ]]; then
     GLANCE_BIN_DIR=$GLANCE_DIR/bin
@@ -94,7 +101,11 @@ function configure_glance() {
     iniset $GLANCE_API_CONF DEFAULT use_syslog $SYSLOG
     iniset $GLANCE_API_CONF DEFAULT filesystem_store_datadir $GLANCE_IMAGE_DIR/
     iniset $GLANCE_API_CONF DEFAULT image_cache_dir $GLANCE_CACHE_DIR/
-    iniset $GLANCE_API_CONF paste_deploy flavor keystone+cachemanagement
+    iniset $GLANCE_API_CONF DEFAULT registry_host $GLANCE_REGISTRY_HOST
+    iniset $GLANCE_API_CONF DEFAULT registry_port $GLANCE_REGISTRY_PORT
+    iniset $GLANCE_API_CONF DEFAULT image_cache_max_size $GLANCE_CACHE_MAX_SIZE
+
+    iniset $GLANCE_API_CONF paste_deploy flavor $GLANCE_API_FLAVOR
     iniset $GLANCE_API_CONF keystone_authtoken auth_host $KEYSTONE_AUTH_HOST
     iniset $GLANCE_API_CONF keystone_authtoken auth_port $KEYSTONE_AUTH_PORT
     iniset $GLANCE_API_CONF keystone_authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
@@ -102,6 +113,7 @@ function configure_glance() {
     iniset $GLANCE_API_CONF keystone_authtoken admin_tenant_name $SERVICE_TENANT_NAME
     iniset $GLANCE_API_CONF keystone_authtoken admin_user glance
     iniset $GLANCE_API_CONF keystone_authtoken admin_password $SERVICE_PASSWORD
+
     if is_service_enabled qpid; then
         iniset $GLANCE_API_CONF DEFAULT notifier_strategy qpid
     elif [ -n "$RABBIT_HOST" ] &&  [ -n "$RABBIT_PASSWORD" ]; then
@@ -113,6 +125,14 @@ function configure_glance() {
         iniset $GLANCE_API_CONF DEFAULT container_formats "ami,ari,aki,bare,ovf,tgz"
         iniset $GLANCE_API_CONF DEFAULT disk_formats "ami,ari,aki,vhd,raw,iso"
     fi
+    cp -p $GLANCE_DIR/etc/policy.json $GLANCE_POLICY_JSON
+    if [ "$GLANCE_API_FLAVOR" == "keystone+cachemanagement" ]; then
+        echo "PATH=""$PATH" > cronTemp
+        echo "*""$GLANCE_CACHE_PRUNER_INTERVAL"" * * * * glance-cache-pruner --config-file=""$GLANCE_API_CONF" >> cronTemp
+        echo "*""$GLANCE_CACHE_CLEANER_INTERVAL"" * * * * glance-cache-cleaner --config-file=""$GLANCE_API_CONF" >> cronTemp
+        sudo crontab cronTemp
+        rm cronTemp
+    fi
 
     # Store the images in swift if enabled.
     if is_service_enabled s-proxy; then
@@ -121,6 +141,8 @@ function configure_glance() {
         iniset $GLANCE_API_CONF DEFAULT swift_store_user $SERVICE_TENANT_NAME:glance
         iniset $GLANCE_API_CONF DEFAULT swift_store_key $SERVICE_PASSWORD
         iniset $GLANCE_API_CONF DEFAULT swift_store_create_container_on_put True
+        iniset $GLANCE_API_CONF DEFAULT swift_store_region $REGION_NAME
+        iniset $GLANCE_API_CONF DEFAULT swift_store_large_object_size 1120
     fi
 
     cp -p $GLANCE_DIR/etc/glance-registry-paste.ini $GLANCE_REGISTRY_PASTE_INI

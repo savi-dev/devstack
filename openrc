@@ -33,9 +33,9 @@ source $RC_DIR/functions
 source $RC_DIR/stackrc
 
 # Load the last env variables if available
-if [[ -r $RC_DIR/.stackenv ]]; then
-    source $RC_DIR/.stackenv
-fi
+#if [[ -r $RC_DIR/.stackenv ]]; then
+#    source $RC_DIR/.stackenv
+#fi
 
 # Get some necessary configuration
 source $RC_DIR/lib/tls

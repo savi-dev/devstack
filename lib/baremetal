@@ -244,6 +244,7 @@ function configure_baremetal_nova_dirs() {
 # this function sets BM_DEPLOY_KERNEL_ID and BM_DEPLOY_RAMDISK_ID
 function upload_baremetal_deploy() {
     token=$1
+    region="$2-"
 
     if [ "$BM_BUILD_DEPLOY_RAMDISK" = "True" ]; then
         BM_DEPLOY_KERNEL=bm-deploy.kernel
@@ -259,14 +260,14 @@ function upload_baremetal_deploy() {
         --os-auth-token $token \
         --os-image-url http://$GLANCE_HOSTPORT \
         image-create \
-        --name $BM_DEPLOY_KERNEL \
+        --name "${region}$BM_DEPLOY_KERNEL" \
         --is-public True --disk-format=aki \
         < $TOP_DIR/files/$BM_DEPLOY_KERNEL  | grep ' id ' | get_field 2)
     BM_DEPLOY_RAMDISK_ID=$(glance \
         --os-auth-token $token \
         --os-image-url http://$GLANCE_HOSTPORT \
         image-create \
-        --name $BM_DEPLOY_RAMDISK \
+        --name "${region}$BM_DEPLOY_RAMDISK" \
         --is-public True --disk-format=ari \
         < $TOP_DIR/files/$BM_DEPLOY_RAMDISK  | grep ' id ' | get_field 2)
 }
@@ -335,6 +336,7 @@ function extract_and_upload_k_and_r_from_image() {
 function upload_baremetal_image() {
     local image_url=$1
     local token=$2
+    local region="$3-"
 
     # Create a directory for the downloaded image tarballs.
     mkdir -p $FILES/images
@@ -385,6 +387,7 @@ function upload_baremetal_image() {
         *) echo "Do not know what to do with $IMAGE_FNAME"; false;;
     esac
 
+    IMAGE_NAME="${region}$IMAGE_NAME"
     if [ "$CONTAINER_FORMAT" = "bare" ]; then
         extract_and_upload_k_and_r_from_image $token $IMAGE
     elif [ "$CONTAINER_FORMAT" = "ami" ]; then

@@ -1307,6 +1307,7 @@ function trueorfalse() {
 function upload_image() {
     local image_url=$1
     local token=$2
+    local region="$3-"
 
     # Create a directory for the downloaded image tarballs.
     mkdir -p $FILES/images
@@ -1325,6 +1326,7 @@ function upload_image() {
     if [[ "$image_url" =~ 'openvz' ]]; then
         IMAGE="$FILES/${IMAGE_FNAME}"
         IMAGE_NAME="${IMAGE_FNAME%.tar.gz}"
+        IMAGE_NAME="${region}$IMAGE_NAME"
         glance --os-auth-token $token --os-image-url http://$GLANCE_HOSTPORT image-create --name "$IMAGE_NAME" --is-public=True --container-format ami --disk-format ami < "${IMAGE}"
         return
     fi
@@ -1351,6 +1353,7 @@ function upload_image() {
             vmdk_net_adapter="${props[2]}"
         fi
 
+        IMAGE_NAME="${region}$IMAGE_NAME"
         glance --os-auth-token $token --os-image-url http://$GLANCE_HOSTPORT image-create --name "$IMAGE_NAME" --is-public=True --container-format bare --disk-format vmdk --property vmware_disktype="$vmdk_disktype" --property vmware_adaptertype="$vmdk_adapter_type" --property hw_vif_model="$vmdk_net_adapter" < "${IMAGE}"
         return
     fi
@@ -1360,6 +1363,7 @@ function upload_image() {
     if [[ "$image_url" =~ '.vhd.tgz' ]]; then
         IMAGE="$FILES/${IMAGE_FNAME}"
         IMAGE_NAME="${IMAGE_FNAME%.vhd.tgz}"
+        IMAGE_NAME="${region}$IMAGE_NAME"
         glance --os-auth-token $token --os-image-url http://$GLANCE_HOSTPORT image-create --name "$IMAGE_NAME" --is-public=True --container-format=ovf --disk-format=vhd < "${IMAGE}"
         return
     fi
@@ -1370,6 +1374,7 @@ function upload_image() {
     if [[ "$image_url" =~ '.xen-raw.tgz' ]]; then
         IMAGE="$FILES/${IMAGE_FNAME}"
         IMAGE_NAME="${IMAGE_FNAME%.xen-raw.tgz}"
+        IMAGE_NAME="${region}$IMAGE_NAME"
         glance \
             --os-auth-token $token \
             --os-image-url http://$GLANCE_HOSTPORT \
@@ -1439,6 +1444,7 @@ function upload_image() {
     esac
 
     if [ "$CONTAINER_FORMAT" = "bare" ]; then
+        IMAGE_NAME="${region}$IMAGE_NAME"
         if [ "$UNPACK" = "zcat" ]; then
             glance --os-auth-token $token --os-image-url http://$GLANCE_HOSTPORT image-create --name "$IMAGE_NAME" --is-public True --container-format=$CONTAINER_FORMAT --disk-format $DISK_FORMAT < <(zcat --force "${IMAGE}")
         else
@@ -1449,6 +1455,7 @@ function upload_image() {
         # We parse the results of the first upload to get the glance ID of the
         # kernel for use when uploading the root filesystem.
         KERNEL_ID=""; RAMDISK_ID="";
+        IMAGE_NAME="${region}$IMAGE_NAME"
         if [ -n "$KERNEL" ]; then
             KERNEL_ID=$(glance --os-auth-token $token --os-image-url http://$GLANCE_HOSTPORT image-create --name "$IMAGE_NAME-kernel" --is-public True --container-format aki --disk-format aki < "$KERNEL" | grep ' id ' | get_field 2)
         fi
