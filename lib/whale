@@ -168,11 +168,34 @@ function install_graphdb() {
 # install_whale() - Collect source and prepare
 function install_whale() {
     git_clone $WHALE_REPO $WHALE_DIR $WHALE_BRANCH
+    install_graphdb
 }
 
 # install_whale() - Collect source and prepare
 function install_whaleclient() {
     git_clone $WHALECLIENT_REPO $WHALECLIENT_DIR $WHALECLIENT_BRANCH
+}
+
+function create_whale_endpoints() {
+   if is_service_enabled whale; then
+        if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+            if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
+            WHALE_SERVICE=$(keystone service-create \
+                --name=whale \
+                --type=configuration \
+                --description="Whale Service" \
+                | grep " id " | get_field 2)
+            else
+               WHALE_SERVICE=$(keystone service-get whale | grep " id " | get_field 2)
+            fi
+            keystone endpoint-create \
+                --region $REGION_NAME \
+                --service_id $WHALE_SERVICE \
+                --publicurl "http://$PUBLIC_SERVICE_HOST:8976/v1" \
+                --adminurl "http://$SERVICE_HOST:9976/v1" \
+                --internalurl "http://$SERVICE_HOST:8976/v1"
+        fi
+   fi
 }
 
 # start_graphdb() - Start running processes, including screen

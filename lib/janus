@@ -196,6 +196,29 @@ function configure_janusclient() {
     setup_develop $JANUSCLIENT_DIR
 }
 
+function create_janus_endpoints() {
+    if is_service_enabled janus; then
+        if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+            if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
+            JANUS_SERVICE=$(keystone service-create \
+                --name=janus \
+                --type=management \
+                --description="Janus Service" \
+                | grep " id " | get_field 2)
+            else
+               JANUS_SERVICE=$(keystone service-get janus | grep " id " | get_field 2)
+            fi
+            keystone endpoint-create \
+                --region $REGION_NAME \
+                --service_id $JANUS_SERVICE \
+                --publicurl "http://$PUBLIC_SERVICE_HOST:8081/v1.0" \
+                --adminurl "http://$SERVICE_HOST:8091/v1.0" \
+                --internalurl "http://$SERVICE_HOST:8081/v1.0"
+        fi
+    fi
+}
+
+
 # init_janus() - Initialize databases, etc.
 function init_janus() {
     iniset $NOVA_CONF DEFAULT janus_host "$JANUS_API_HOST"
@@ -209,6 +232,7 @@ function init_janus() {
 function install_janus() {
     git_clone $JANUS_REPO $JANUS_DIR $JANUS_BRANCH
     sudo pip install networkx
+    sudo apt-get install -y python-dpkt
     setup_develop $JANUS_DIR
     install_ryu
     configure_ryu

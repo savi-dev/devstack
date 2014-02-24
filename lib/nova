@@ -234,6 +234,8 @@ function configure_nova() {
 
     if is_service_enabled n-cpu; then
         # Force IP forwarding on, just on case
+        sudo apt-get install lm-sensors guestmount -y
+        sudo pip install pysensors
         sudo sysctl -w net.ipv4.ip_forward=1
 
         if [[ "$VIRT_DRIVER" = 'libvirt' ]]; then

@@ -66,6 +66,7 @@ function neutron_plugin_configure_plugin_agent() {
 
 function neutron_plugin_configure_service() {
     iniset /$Q_PLUGIN_CONF_FILE ovs openflow_rest_api $JANUS_API_HOST:$JANUS_API_PORT
+    iniset /$Q_PLUGIN_CONF_FILE ovs openflow_controller $RYU_OFP_HOST:$RYU_OFP_PORT
 
     _neutron_ovs_base_configure_firewall_driver
 }

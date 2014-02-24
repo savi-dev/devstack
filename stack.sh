@@ -902,6 +902,10 @@ if is_service_enabled key; then
        create_nova_accounts
        create_cinder_accounts
        create_neutron_accounts
+       create_janus_endpoints
+       create_whale_endpoints
+
+
 
        if is_service_enabled trove; then
           create_trove_accounts
