@@ -1456,6 +1456,11 @@ function upload_image() {
         # kernel for use when uploading the root filesystem.
         KERNEL_ID=""; RAMDISK_ID="";
         IMAGE_NAME="${region}$IMAGE_NAME"
+        ID_LIST=$(glance image-list | grep  $IMAGE_NAME | awk '{print $2}')
+        for i_id in $ID_LIST; do
+            glance --os-auth-token $token --os-image-url http://$GLANCE_HOSTPORT image-delete $i_id
+        done
+        sleep 5
         if [ -n "$KERNEL" ]; then
             KERNEL_ID=$(glance --os-auth-token $token --os-image-url http://$GLANCE_HOSTPORT image-create --name "$IMAGE_NAME-kernel" --is-public True --container-format aki --disk-format aki < "$KERNEL" | grep ' id ' | get_field 2)
         fi

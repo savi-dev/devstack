@@ -353,6 +353,13 @@ create_nova_accounts() {
                 | grep " id " | get_field 2)
             else
                NOVA_V3_SERVICE=$(keystone service-get novav3 | grep " id " | get_field 2)
+               if [[ -z $NOVA_V3_SERVICE ]]; then 
+                   NOVA_V3_SERVICE=$(keystone service-create \
+                       --name=novav3 \
+                       --type=computev3 \
+                       --description="Nova Compute Service V3" \
+                       | grep " id " | get_field 2)
+               fi
             fi
             keystone endpoint-create \
                 --region $REGION_NAME \

@@ -155,6 +155,21 @@ if [[ "$ENABLED_SERVICES" =~ "ceilometer" ]]; then
     keystone user-role-add --tenant-id $SERVICE_TENANT \
         --user-id $CEILOMETER_USER \
         --role-id $RESELLER_ROLE
+       else
+           CEILOMETER_USER=$(get_id keystone user-get ceilometer)
+           if [[ -z $CEILOMETER_USER ]]; then
+               CEILOMETER_USER=$(get_id keystone user-create --name=ceilometer \
+                   --pass="$SERVICE_PASSWORD" \
+                   --tenant_id $SERVICE_TENANT \
+                   --email=ceilometer@example.com)
+               keystone user-role-add --tenant-id $SERVICE_TENANT \
+                   --user-id $CEILOMETER_USER \
+                   --role-id $ADMIN_ROLE
+               # Ceilometer needs ResellerAdmin role to access swift account stats.
+               keystone user-role-add --tenant-id $SERVICE_TENANT \
+                  --user-id $CEILOMETER_USER \
+                  --role-id $RESELLER_ROLE
+           fi
     fi
     if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
         if [[ "$KEYSTONE_TYPE" = 'LOCAL' ]]; then
@@ -164,6 +179,13 @@ if [[ "$ENABLED_SERVICES" =~ "ceilometer" ]]; then
             --description="Ceilometer Service")
         else
             CEILOMETER_SERVICE=$(get_id keystone service-get ceilometer)
+               if [[ -z $CEILOMETER_SERVICE ]]; then
+                   CEILOMETER_SERVICE=$(keystone service-create \
+                       --name=ceilometer \
+                       --type=metering \
+                       --description="Ceilometer Service" \
+                       | grep " id " | get_field 2)
+               fi
         fi
         keystone endpoint-create \
             --region $REGION_NAME \

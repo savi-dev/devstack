@@ -373,6 +373,13 @@ create_cinder_accounts() {
                 | grep " id " | get_field 2)
             else
                CINDER_V2_SERVICE=$(keystone service-get cinderv2 | grep " id " | get_field 2)
+               if [[ -z $CINDER_V2_SERVICE ]]; then
+                   CINDER_V2_SERVICE=$(keystone service-create \
+                       --name=cinderv2 \
+                       --type=volumev2 \
+                       --description="Cinder Volume Service V2" \
+                       | grep " id " | get_field 2)
+               fi
             fi
             keystone endpoint-create \
                 --region $REGION_NAME \
