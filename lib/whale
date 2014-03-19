@@ -163,6 +163,7 @@ function install_graphdb() {
     else
         echo_summary "Neo4j Graph Database has been already installed\n"
     fi 
+    sudo pip install neo4jrestclient
 }
 
 # install_whale() - Collect source and prepare

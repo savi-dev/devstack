@@ -232,6 +232,7 @@ function init_janus() {
 function install_janus() {
     git_clone $JANUS_REPO $JANUS_DIR $JANUS_BRANCH
     sudo pip install networkx
+    sudo pip install pika
     sudo apt-get install -y python-dpkt
     setup_develop $JANUS_DIR
     install_ryu

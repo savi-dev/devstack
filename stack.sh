@@ -751,10 +751,10 @@ if is_service_enabled whale; then
 fi
 
 #janus will be installed as part of neutron third party
-#if is_service_enabled janus fv-agt; then
-    #install_janus
-    #configure_janus
-#fi
+if is_service_enabled janus n-sch; then
+    install_janusclient
+    configure_janusclient
+fi
 
 # Extras Install
 # --------------

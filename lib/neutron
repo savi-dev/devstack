@@ -271,7 +271,8 @@ function create_nova_conf_neutron() {
     iniset $NOVA_CONF DEFAULT neutron_admin_username "$Q_ADMIN_USERNAME"
     iniset $NOVA_CONF DEFAULT neutron_admin_password "$SERVICE_PASSWORD"
     iniset $NOVA_CONF DEFAULT neutron_admin_auth_url "$KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_SERVICE_HOST:$KEYSTONE_AUTH_PORT/v2.0"
-    iniset $NOVA_CONF DEFAULT neutron_auth_strategy "$Q_AUTH_STRATEGY"
+    #iniset $NOVA_CONF DEFAULT neutron_auth_strategy "$Q_AUTH_STRATEGY"
+    iniset $NOVA_CONF DEFAULT neutron_auth_strategy ""
     iniset $NOVA_CONF DEFAULT neutron_admin_tenant_name "$SERVICE_TENANT_NAME"
     iniset $NOVA_CONF DEFAULT neutron_region_name "$REGION_NAME"
     iniset $NOVA_CONF DEFAULT neutron_url "http://$Q_HOST:$Q_PORT"
@@ -800,6 +801,7 @@ function _neutron_setup_keystone() {
     iniset $conf_file $section admin_user $Q_ADMIN_USERNAME
     iniset $conf_file $section admin_password $SERVICE_PASSWORD
     iniset $conf_file $section auth_region $REGION_NAME
+    iniset $conf_file $section remote_users $REMOTE_USERS
     if [[ -z $skip_auth_cache ]]; then
         iniset $conf_file $section signing_dir $NEUTRON_AUTH_CACHE_DIR
         # Create cache dir
