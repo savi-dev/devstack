@@ -990,10 +990,11 @@ if is_service_enabled whale; then
 fi
 
 #janus will be inited and started as part of neutron thirdparty
-#if is_service_enabled janus; then
+if is_service_enabled janus; then
+    init_janus_db
     #init_janus
     #start_janus
-#fi
+fi
 
 # Some Neutron plugins require network controllers which are not
 # a part of the OpenStack project. Configure and start them.
