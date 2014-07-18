@@ -65,35 +65,35 @@ fi
 GIT_BASE=${GIT_BASE:-https://github.com}
 
 # metering service
-CEILOMETER_REPO=${CEILOMETER_REPO:-${GIT_BASE}/openstack/ceilometer.git}
+CEILOMETER_REPO=${CEILOMETER_REPO:-${GIT_BASE}/savi-dev/ceilometer.git}
 CEILOMETER_BRANCH=${CEILOMETER_BRANCH:-stable/havana}
 
 # ceilometer client library
-CEILOMETERCLIENT_REPO=${CEILOMETERCLIENT_REPO:-${GIT_BASE}/openstack/python-ceilometerclient.git}
+CEILOMETERCLIENT_REPO=${CEILOMETERCLIENT_REPO:-${GIT_BASE}/savi-dev/python-ceilometerclient.git}
 CEILOMETERCLIENT_BRANCH=${CEILOMETERCLIENT_BRANCH:-master}
 
 # volume service
-CINDER_REPO=${CINDER_REPO:-${GIT_BASE}/openstack/cinder.git}
-CINDER_BRANCH=${CINDER_BRANCH:-stable/havana}
+CINDER_REPO=${CINDER_REPO:-${GIT_BASE}/savi-dev/cinder.git}
+CINDER_BRANCH=${CINDER_BRANCH:-s-havana}
 
 # volume client
-CINDERCLIENT_REPO=${CINDERCLIENT_REPO:-${GIT_BASE}/openstack/python-cinderclient.git}
-CINDERCLIENT_BRANCH=${CINDERCLIENT_BRANCH:-master}
+CINDERCLIENT_REPO=${CINDERCLIENT_REPO:-${GIT_BASE}/savi-dev/python-cinderclient.git}
+CINDERCLIENT_BRANCH=${CINDERCLIENT_BRANCH:-s-havana}
 
 # image catalog service
-GLANCE_REPO=${GLANCE_REPO:-${GIT_BASE}/openstack/glance.git}
-GLANCE_BRANCH=${GLANCE_BRANCH:-stable/havana}
+GLANCE_REPO=${GLANCE_REPO:-${GIT_BASE}/savi-dev/glance.git}
+GLANCE_BRANCH=${GLANCE_BRANCH:-s-havana}
 
 # python glance client library
-GLANCECLIENT_REPO=${GLANCECLIENT_REPO:-${GIT_BASE}/openstack/python-glanceclient.git}
-GLANCECLIENT_BRANCH=${GLANCECLIENT_BRANCH:-master}
+GLANCECLIENT_REPO=${GLANCECLIENT_REPO:-${GIT_BASE}/savi-dev/python-glanceclient.git}
+GLANCECLIENT_BRANCH=${GLANCECLIENT_BRANCH:-s-havana}
 
 # heat service
-HEAT_REPO=${HEAT_REPO:-${GIT_BASE}/openstack/heat.git}
+HEAT_REPO=${HEAT_REPO:-${GIT_BASE}/savi-dev/heat.git}
 HEAT_BRANCH=${HEAT_BRANCH:-stable/havana}
 
 # python heat client library
-HEATCLIENT_REPO=${HEATCLIENT_REPO:-${GIT_BASE}/openstack/python-heatclient.git}
+HEATCLIENT_REPO=${HEATCLIENT_REPO:-${GIT_BASE}/savi-dev/python-heatclient.git}
 HEATCLIENT_BRANCH=${HEATCLIENT_BRANCH:-master}
 
 # django powered web control panel for openstack
@@ -109,27 +109,27 @@ KEYSTONE_REPO=${KEYSTONE_REPO:-${GIT_BASE}/openstack/keystone.git}
 KEYSTONE_BRANCH=${KEYSTONE_BRANCH:-stable/havana}
 
 # python keystone client library to nova that horizon uses
-KEYSTONECLIENT_REPO=${KEYSTONECLIENT_REPO:-${GIT_BASE}/openstack/python-keystoneclient.git}
-KEYSTONECLIENT_BRANCH=${KEYSTONECLIENT_BRANCH:-master}
+KEYSTONECLIENT_REPO=${KEYSTONECLIENT_REPO:-${GIT_BASE}/sav-dev/python-keystoneclient.git}
+KEYSTONECLIENT_BRANCH=${KEYSTONECLIENT_BRANCH:-s-havana}
 
 # compute service
-NOVA_REPO=${NOVA_REPO:-${GIT_BASE}/openstack/nova.git}
-NOVA_BRANCH=${NOVA_BRANCH:-stable/havana}
+NOVA_REPO=${NOVA_REPO:-${GIT_BASE}/savi-dev/nova.git}
+NOVA_BRANCH=${NOVA_BRANCH:-s-havana}
 
 # python client library to nova that horizon (and others) use
-NOVACLIENT_REPO=${NOVACLIENT_REPO:-${GIT_BASE}/openstack/python-novaclient.git}
-NOVACLIENT_BRANCH=${NOVACLIENT_BRANCH:-master}
+NOVACLIENT_REPO=${NOVACLIENT_REPO:-${GIT_BASE}/savi-dev/python-novaclient.git}
+NOVACLIENT_BRANCH=${NOVACLIENT_BRANCH:-s-havana}
 
 # consolidated openstack python client
-OPENSTACKCLIENT_REPO=${OPENSTACKCLIENT_REPO:-${GIT_BASE}/openstack/python-openstackclient.git}
-OPENSTACKCLIENT_BRANCH=${OPENSTACKCLIENT_BRANCH:-master}
+OPENSTACKCLIENT_REPO=${OPENSTACKCLIENT_REPO:-${GIT_BASE}/savi-dev/python-openstackclient.git}
+OPENSTACKCLIENT_BRANCH=${OPENSTACKCLIENT_BRANCH:-s-havana}
 
 # oslo.config
-OSLOCFG_REPO=${OSLOCFG_REPO:-${GIT_BASE}/openstack/oslo.config.git}
+OSLOCFG_REPO=${OSLOCFG_REPO:-${GIT_BASE}/savi-dev/oslo.config.git}
 OSLOCFG_BRANCH=${OSLOCFG_BRANCH:-stable/havana}
 
 # oslo.messaging
-OSLOMSG_REPO=${OSLOMSG_REPO:-${GIT_BASE}/openstack/oslo.messaging.git}
+OSLOMSG_REPO=${OSLOMSG_REPO:-${GIT_BASE}/savi-dev/oslo.messaging.git}
 OSLOMSG_BRANCH=${OSLOMSG_BRANCH:-master}
 
 # pbr drives the setuptools configs
@@ -137,26 +137,26 @@ PBR_REPO=${PBR_REPO:-${GIT_BASE}/openstack-dev/pbr.git}
 PBR_BRANCH=${PBR_BRANCH:-master}
 
 # neutron service
-NEUTRON_REPO=${NEUTRON_REPO:-${GIT_BASE}/openstack/neutron.git}
-NEUTRON_BRANCH=${NEUTRON_BRANCH:-stable/havana}
+NEUTRON_REPO=${NEUTRON_REPO:-${GIT_BASE}/savi-dev/quantum.git}
+NEUTRON_BRANCH=${NEUTRON_BRANCH:-s-havana}
 
 # neutron client
-NEUTRONCLIENT_REPO=${NEUTRONCLIENT_REPO:-${GIT_BASE}/openstack/python-neutronclient.git}
-NEUTRONCLIENT_BRANCH=${NEUTRONCLIENT_BRANCH:-master}
+NEUTRONCLIENT_REPO=${NEUTRONCLIENT_REPO:-${GIT_BASE}/savi-dev/python-neutronclient.git}
+NEUTRONCLIENT_BRANCH=${NEUTRONCLIENT_BRANCH:-s-havana}
 
 # consolidated openstack requirements
-REQUIREMENTS_REPO=${REQUIREMENTS_REPO:-${GIT_BASE}/openstack/requirements.git}
+REQUIREMENTS_REPO=${REQUIREMENTS_REPO:-${GIT_BASE}/savi-dev/requirements.git}
 REQUIREMENTS_BRANCH=${REQUIREMENTS_BRANCH:-stable/havana}
 
 # storage service
-SWIFT_REPO=${SWIFT_REPO:-${GIT_BASE}/openstack/swift.git}
+SWIFT_REPO=${SWIFT_REPO:-${GIT_BASE}/savi-dev/swift.git}
 SWIFT_BRANCH=${SWIFT_BRANCH:-stable/havana}
 SWIFT3_REPO=${SWIFT3_REPO:-${GIT_BASE}/fujita/swift3.git}
 SWIFT3_BRANCH=${SWIFT3_BRANCH:-master}
 
 # python swift client library
-SWIFTCLIENT_REPO=${SWIFTCLIENT_REPO:-${GIT_BASE}/openstack/python-swiftclient.git}
-SWIFTCLIENT_BRANCH=${SWIFTCLIENT_BRANCH:-master}
+SWIFTCLIENT_REPO=${SWIFTCLIENT_REPO:-${GIT_BASE}/savi-dev/python-swiftclient.git}
+SWIFTCLIENT_BRANCH=${SWIFTCLIENT_BRANCH:-s-havana}
 
 # Tempest test suite
 TEMPEST_REPO=${TEMPEST_REPO:-${GIT_BASE}/openstack/tempest.git}
@@ -174,11 +174,11 @@ BM_POSEUR_REPO=${BM_POSEUR_REPO:-${GIT_BASE}/tripleo/bm_poseur.git}
 BM_POSEUR_BRANCH=${BM_POSEUR_BRANCH:-master}
 
 # a websockets/html5 or flash powered VNC console for vm instances
-NOVNC_REPO=${NOVNC_REPO:-${GIT_BASE}/kanaka/noVNC.git}
-NOVNC_BRANCH=${NOVNC_BRANCH:-master}
+NOVNC_REPO=${NOVNC_REPO:-${GIT_BASE}/savi-dev/noVNC.git}
+NOVNC_BRANCH=${NOVNC_BRANCH:-s-havana}
 
 # ryu service
-RYU_REPO=${RYU_REPO:-${GIT_BASE}/osrg/ryu.git}
+RYU_REPO=${RYU_REPO:-${GIT_BASE}/savi-dev/ryu.git}
 RYU_BRANCH=${RYU_BRANCH:-master}
 
 # a websockets/html5 or flash powered SPICE console for vm instances

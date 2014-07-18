@@ -27,15 +27,17 @@ function neutron_ovs_base_set_datapath_id() {
 }
 
 function neutron_ovs_base_cleanup() {
+    
+    echo in neutron_ovs_base_cleanup
     # remove all OVS ports that look like Neutron created ports
-    for port in $(sudo ovs-vsctl list port | grep -o -e tap[0-9a-f\-]* -e q[rg]-[0-9a-f\-]*); do
-        sudo ovs-vsctl del-port ${port}
-    done
+    #for port in $(sudo ovs-vsctl list port | grep -o -e tap[0-9a-f\-]* -e q[rg]-[0-9a-f\-]*); do
+    #    sudo ovs-vsctl del-port ${port}
+    #done
 
     # remove all OVS bridges created by Neutron
-    for bridge in $(sudo ovs-vsctl list-br | grep -o -e ${OVS_BRIDGE} -e ${PUBLIC_BRIDGE}); do
-        sudo ovs-vsctl del-br ${bridge}
-    done
+    #for bridge in $(sudo ovs-vsctl list-br | grep -o -e ${OVS_BRIDGE} -e ${PUBLIC_BRIDGE}); do
+    #    sudo ovs-vsctl del-br ${bridge}
+    #done
 }
 
 function _neutron_ovs_base_install_agent_packages() {

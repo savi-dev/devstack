@@ -1208,9 +1208,9 @@ fi
 # This step also creates certificates for tenants and users,
 # which is helpful in image bundle steps.
 
-if is_service_enabled nova && is_service_enabled key; then
-    $TOP_DIR/tools/create_userrc.sh -PA --target-dir $TOP_DIR/accrc
-fi
+#if is_service_enabled nova && is_service_enabled key; then
+#    $TOP_DIR/tools/create_userrc.sh -PA --target-dir $TOP_DIR/accrc
+#fi
 
 
 # Install Images

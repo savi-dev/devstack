@@ -104,6 +104,7 @@ function configure_glance() {
     iniset $GLANCE_API_CONF DEFAULT registry_host $GLANCE_REGISTRY_HOST
     iniset $GLANCE_API_CONF DEFAULT registry_port $GLANCE_REGISTRY_PORT
     iniset $GLANCE_API_CONF DEFAULT image_cache_max_size $GLANCE_CACHE_MAX_SIZE
+    iniset $GLANCE_API_CONF DEFAULT known_stores glance.store.swift.Store
 
     iniset $GLANCE_API_CONF paste_deploy flavor $GLANCE_API_FLAVOR
     iniset $GLANCE_API_CONF keystone_authtoken auth_host $KEYSTONE_AUTH_HOST
