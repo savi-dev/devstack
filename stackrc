@@ -109,7 +109,7 @@ KEYSTONE_REPO=${KEYSTONE_REPO:-${GIT_BASE}/openstack/keystone.git}
 KEYSTONE_BRANCH=${KEYSTONE_BRANCH:-stable/havana}
 
 # python keystone client library to nova that horizon uses
-KEYSTONECLIENT_REPO=${KEYSTONECLIENT_REPO:-${GIT_BASE}/sav-dev/python-keystoneclient.git}
+KEYSTONECLIENT_REPO=${KEYSTONECLIENT_REPO:-${GIT_BASE}/savi-dev/python-keystoneclient.git}
 KEYSTONECLIENT_BRANCH=${KEYSTONECLIENT_BRANCH:-s-havana}
 
 # compute service
