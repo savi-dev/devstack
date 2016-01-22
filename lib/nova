@@ -575,7 +575,7 @@ function init_nova() {
         recreate_database nova latin1
 
         # Migrate nova database
-        $NOVA_BIN_DIR/nova-manage db sync
+        nova-manage db sync
 
         if is_service_enabled n-cell; then
             recreate_database $NOVA_CELLS_DB latin1
@@ -618,7 +618,7 @@ function start_nova_api() {
         service_port=$NOVA_SERVICE_PORT_INT
     fi
 
-    screen_it n-api "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-api"
+    screen_it n-api "cd $NOVA_DIR && nova-api"
     echo "Waiting for nova-api to start..."
     if ! wait_for_service $SERVICE_TIMEOUT http://$SERVICE_HOST:$service_port; then
         die $LINENO "nova-api did not start"
@@ -635,11 +635,11 @@ function start_nova() {
     NOVA_CONF_BOTTOM=$NOVA_CONF
 
     # ``screen_it`` checks ``is_service_enabled``, it is not needed here
-    screen_it n-cond "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-conductor"
+    screen_it n-cond "cd $NOVA_DIR && nova-conductor"
 
     if is_service_enabled n-cell; then
         NOVA_CONF_BOTTOM=$NOVA_CELLS_CONF
-        screen_it n-cond "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-conductor --config-file $NOVA_CELLS_CONF"
+        screen_it n-cond "cd $NOVA_DIR && nova-conductor --config-file $NOVA_CELLS_CONF"
         screen_it n-cell-region "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-cells --config-file $NOVA_CONF"
         screen_it n-cell-child "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-cells --config-file $NOVA_CELLS_CONF"
     fi
@@ -658,15 +658,15 @@ function start_nova() {
         fi
         screen_it n-cpu "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-compute --config-file $NOVA_CONF_BOTTOM"
     fi
-    screen_it n-crt "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-cert"
+    screen_it n-crt "cd $NOVA_DIR && nova-cert"
     screen_it n-net "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-network --config-file $NOVA_CONF_BOTTOM"
-    screen_it n-sch "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-scheduler --config-file $NOVA_CONF_BOTTOM"
+    screen_it n-sch "cd $NOVA_DIR && nova-scheduler --config-file $NOVA_CONF_BOTTOM"
     screen_it n-api-meta "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-api-metadata --config-file $NOVA_CONF_BOTTOM"
 
-    screen_it n-novnc "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-novncproxy --config-file $NOVA_CONF --web $NOVNC_DIR"
-    screen_it n-xvnc "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-xvpvncproxy --config-file $NOVA_CONF"
+    screen_it n-novnc "cd $NOVA_DIR && nova-novncproxy --config-file $NOVA_CONF --web $NOVNC_DIR"
+    screen_it n-xvnc "cd $NOVA_DIR && nova-xvpvncproxy --config-file $NOVA_CONF"
     screen_it n-spice "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-spicehtml5proxy --config-file $NOVA_CONF --web $SPICE_DIR"
-    screen_it n-cauth "cd $NOVA_DIR && $NOVA_BIN_DIR/nova-consoleauth"
+    screen_it n-cauth "cd $NOVA_DIR && nova-consoleauth"
 
     # Starting the nova-objectstore only if swift3 service is not enabled.
     # Swift will act as s3 objectstore.

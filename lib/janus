@@ -160,7 +160,7 @@ function configure_janus() {
     iniset $JANUS_CONF sql connection `database_connection_url janus`
 
     iniset $JANUS_CONF rabbitmq rabbit_password $RABBIT_PASSWORD
-    iniset $JANUS_CONF rabbitmq rabbit_host $RABBIT_HOST
+    iniset $JANUS_CONF rabbitmq rabbit_host $HOST_IP
 
     iniset $JANUS_CONF filter:authtoken auth_host $KEYSTONE_AUTH_HOST
     iniset $JANUS_CONF filter:authtoken auth_port $KEYSTONE_AUTH_PORT

@@ -10,6 +10,11 @@
 # NOTE: support for the old NOVA_* novaclient environment variables has
 # been removed.
 
+OS_USERNAME=admin
+OS_TENANT_NAME=admin
+OS_REGION_NAME=EDGE-HD-1
+SERVICE_HOST=iam.savitestbed.ca
+
 if [[ -n "$1" ]]; then
     OS_USERNAME=$1
 fi

@@ -18,6 +18,7 @@ function _neutron_ovs_base_setup_bridge() {
     neutron-ovs-cleanup
     sudo ovs-vsctl --no-wait -- --may-exist add-br $bridge
     sudo ovs-vsctl --no-wait br-set-external-id $bridge bridge-id $bridge
+    sudo ovs-vsctl --no-wait set bridge $bridge protocols=OpenFlow10
 }
 
 function neutron_ovs_base_set_datapath_id() {

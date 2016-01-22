@@ -895,6 +895,14 @@ if is_service_enabled key; then
     # Do the keystone-specific bits from keystone_data.sh
     export OS_SERVICE_TOKEN=$SERVICE_TOKEN
     export OS_SERVICE_ENDPOINT=$SERVICE_ENDPOINT
+
+    #export OS_REGION_NAME=$REGION_NAME
+    #export OS_AUTH_URL=$SERVICE_ENDPOINT
+    #export OS_TENANT_NAME=admin
+    #export OS_USERNAME=admin
+    #export OS_PASSWORD=$ADMIN_PASSWORD
+    #unset OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+
     #export PUBLIC_SERVICE_HOST=${PUBLIC_SERVICE_HOST:-$SERVICE_HOST}
     #if [[ "$KEYSTONE_TYPE" = "LOCAL" ]]; then
        delete_all_endpoints_in_region

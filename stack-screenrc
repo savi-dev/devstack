@@ -1,0 +1,72 @@
+sessionname stack
+hardstatus alwayslastline '%{= .} %-Lw%{= .}%> %n%f %t*%{= .}%+Lw%< %-=%{g}(%{d}%H/%l%{g})'
+setenv PROMPT_COMMAND /bin/true
+screen -t shell bash
+screen -t w-sync bash
+stuff "cd /opt/stack/whale && /opt/stack/whale/bin/whale-init --config-file /etc/whale/whale.conf"
+screen -t w-api bash
+stuff "sleep 10;cd /opt/stack/whale && /opt/stack/whale/bin/whale-server --config-file /etc/whale/whale.conf"
+screen -t ryu bash
+stuff "cd /opt/stack/ryu && /opt/stack/ryu/bin/ryu-manager --flagfile /etc/ryu/ryu.conf"
+screen -t janus bash
+stuff "sleep 15;cd /opt/stack/janus && /opt/stack/janus/bin/janus-init --config-file /etc/janus/janus.conf"
+screen -t s-proxy bash
+stuff "cd /opt/stack/swift && /opt/stack/swift/bin/swift-proxy-server /etc/swift/proxy-server.conf -v"
+screen -t s-object bash
+stuff "cd /opt/stack/swift && /opt/stack/swift/bin/swift-object-server /etc/swift/object-server/1.conf -v"
+screen -t s-container bash
+stuff "cd /opt/stack/swift && /opt/stack/swift/bin/swift-container-server /etc/swift/container-server/1.conf -v"
+screen -t s-account bash
+stuff "cd /opt/stack/swift && /opt/stack/swift/bin/swift-account-server /etc/swift/account-server/1.conf -v"
+screen -t g-api bash
+stuff "cd /opt/stack/glance; /usr/local/bin/glance-api --config-file=/etc/glance/glance-api.conf"
+screen -t n-api bash
+stuff "cd /opt/stack/nova && nova-api --config-dir=/etc/nova"
+screen -t q-svc bash
+stuff "sleep 25;cd /opt/stack/neutron && python /usr/local/bin/neutron-server --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/janus/janus.ini"
+screen -t q-agt bash
+stuff "sleep 30;cd /opt/stack/neutron && python /opt/stack/neutron/neutron/plugins/janus/agent/janus_neutron_agent.py --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/janus/janus.ini"
+screen -t q-dhcp bash
+stuff "sleep 30;cd /opt/stack/neutron && python /usr/local/bin/neutron-dhcp-agent --config-file /etc/neutron/neutron.conf --config-file=/etc/neutron/dhcp_agent.ini"
+screen -t q-l3 bash
+stuff "sleep 30;cd /opt/stack/neutron && python /usr/local/bin/neutron-l3-agent --config-file /etc/neutron/neutron.conf --config-file=/etc/neutron/l3_agent.ini"
+screen -t q-meta bash
+stuff "sleep 30;cd /opt/stack/neutron && python /usr/local/bin/neutron-metadata-agent --config-file /etc/neutron/neutron.conf --config-file=/etc/neutron/metadata_agent.ini"
+screen -t n-cond bash
+stuff "cd /opt/stack/nova && nova-conductor  --config-dir=/etc/nova"
+screen -t n-crt bash
+stuff "cd /opt/stack/nova && nova-cert --config-dir=/etc/nova"
+screen -t n-sch bash
+stuff "cd /opt/stack/nova && nova-scheduler --config-file /etc/nova/nova.conf"
+screen -t n-novnc bash
+stuff "cd /opt/stack/nova && nova-novncproxy --config-file /etc/nova/nova.conf --web /opt/stack/noVNC"
+screen -t n-xvnc bash
+stuff "cd /opt/stack/nova && nova-xvpvncproxy --config-file /etc/nova/nova.conf"
+screen -t n-cauth bash
+stuff "cd /opt/stack/nova && nova-consoleauth --config-dir=/etc/nova"
+screen -t arp bash
+stuff "sleep 90;cd /opt/stack/janus; QS=`sudo ip netns list | grep qrouter`;sudo ip netns exec \$QS /opt/stack/janus/bin/arp_handler.py --config-file /etc/janus/janus.conf"
+screen -t c-api bash
+stuff "cd /opt/stack/cinder && /opt/stack/cinder/bin/cinder-api --config-file /etc/cinder/cinder.conf"
+screen -t c-sch bash
+stuff "cd /opt/stack/cinder && /opt/stack/cinder/bin/cinder-scheduler --config-file /etc/cinder/cinder.conf"
+screen -t c-vol bash
+stuff "cd /opt/stack/cinder && /opt/stack/cinder/bin/cinder-volume --config-file /etc/cinder/cinder.conf"
+screen -t ceilometer-acentral bash
+stuff "sleep 90; cd ; ceilometer-agent-central --config-file /etc/ceilometer/ceilometer.conf"
+screen -t ceilometer-collector bash
+stuff "sleep 90; cd ; ceilometer-collector --config-file /etc/ceilometer/ceilometer.conf"
+screen -t ceilometer-api bash
+stuff "sleep 60; cd ; ceilometer-api --config-file /etc/ceilometer/ceilometer.conf"
+screen -t ceilometer-alarm-notifier bash
+stuff "sleep 90; cd ; ceilometer-alarm-notifier --config-file /etc/ceilometer/ceilometer.conf"
+#screen -t n-cpu bash
+#stuff "sleep 90; cd /opt/stack/nova && sg libvirtd '/usr/local/bin/nova-compute --config-file /etc/nova/nova.conf' "
+screen -t ceil-of bash
+stuff "sleep 90; cd /opt/stack/ceilometer && ceilometer-openflow-agent --config-file /etc/ceilometer/ceilometer.conf"
+screen -t ceil-phy bash
+stuff "sleep 90; cd /opt/stack/ceilometer && ceilometer-physerver-agent --config-file /etc/ceilometer/ceilometer.conf"
+#screen -t ceil-comp bash
+#stuff "sleep 90; cd /opt/stack/ceilometer && ceilometer-agent-compute --config-file /etc/ceilometer/ceilometer.conf"
+screen -t ceilometer-evaluator
+stuff "sleep 90; cd /opt/stack/ceilometer && ceilometer-alarm-evaluator --config-file /etc/ceilometer/ceilometer.conf"

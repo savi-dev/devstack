@@ -74,7 +74,7 @@ function neutron_plugin_configure_service() {
 function neutron_plugin_setup_interface_driver() {
     local conf_file=$1
     iniset $conf_file DEFAULT interface_driver neutron.agent.linux.interface.JanusOVSInterfaceDriver
-    iniset $conf_file DEFAULT ovs_use_veth True
+    iniset $conf_file DEFAULT ovs_use_veth False
 }
 
 function has_neutron_plugin_security_group() {

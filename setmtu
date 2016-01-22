@@ -1,0 +1,20 @@
+#!/bin/sh
+# dhclient change hostname script for Ubuntu
+# /etc/dhcp/dhclient-exit-hooks.d/sethostname
+# logs in /var/log/upstart/network-interface-eth0.log
+
+# for debugging:
+echo "setmtu BEGIN"
+export
+set -x
+
+if [ $reason = "BOUND" ]; then
+    /sbin/ifconfig $interface mtu 2000
+fi
+if [ $reason = "RENEW" ]; then
+    /sbin/ifconfig $interface mtu 2000
+fi
+if [ $reason = "REBIND" ]; then
+    /sbin/ifconfig $interface mtu 2000
+fi
+echo "setmtu END"

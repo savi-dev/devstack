@@ -97,6 +97,7 @@ function _cleanup_keystone_apache_wsgi() {
 }
 
 function delete_all_endpoints_in_region() {
+    IDS=""
     IDS=$(keystone endpoint-list | grep $REGION_NAME | awk '{print $2}')
     for i in $IDS
     do
@@ -325,6 +326,8 @@ create_keystone_accounts() {
             --description "Keystone Identity Service" \
             | grep " id " | get_field 2)
         else
+           env
+           keystone service-get keystone
            KEYSTONE_SERVICE=$(keystone service-get keystone | grep " id " | get_field 2)
         fi
         keystone endpoint-create \
