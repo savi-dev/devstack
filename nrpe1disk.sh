@@ -7,7 +7,7 @@
 NAGIOS_SERVER=$HEAD_IP
 sudo apt-get install openssl nagios-nrpe-server nagios-plugins nagios-plugins-basic nagios-plugins-standard -y
 
-sudo sed -i "s/allowed_hosts=127.0.0.1/allowed_hosts=127.0.0.1,172.17.0.0/24,$NAGIOS_SERVER/g" /etc/nagios/nrpe.cfg
+sudo sed -i "s/allowed_hosts=127.0.0.1/allowed_hosts=127.0.0.1,172.17.0.0\/24,$NAGIOS_SERVER/g" /etc/nagios/nrpe.cfg
 sudo sed -i "s/dont_blame_nrpe=0/dont_blame_nrpe=1/g" /etc/nagios/nrpe.cfg
 sudo sed -i "s/command\[check/\#command[check/g" /etc/nagios/nrpe.cfg
 
@@ -15,7 +15,7 @@ sudo sh -c "echo command[check_users]=/usr/lib/nagios/plugins/check_users -w 55 
 
 sudo sh -c "echo command[check_load]=/usr/lib/nagios/plugins/check_load -w 15,10,5 -c 30,25,20 >> /etc/nagios/nrpe.cfg"
 sudo sh -c "echo command[check_zombie_procs]=/usr/lib/nagios/plugins/check_procs -w 5 -c 10 -s Z >> /etc/nagios/nrpe.cfg"
-sudo sh -c "echo command[check_total_procs]=/usr/lib/nagios/plugins/check_procs -w 500 -c 650 >> /etc/nagios/nrpe.cfg"
+sudo sh -c "echo command[check_total_procs]=/usr/lib/nagios/plugins/check_procs -w 850 -c 950 >> /etc/nagios/nrpe.cfg"
 
 DISKS=`sudo df -h | grep "/dev/" | awk '{print $1}'`
 echo "disks found:"
