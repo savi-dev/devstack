@@ -1,0 +1,171 @@
+ENABLED_SERVICES=n-sch,n-cauth,mysql,rabbit,glance,cinder,c-api,c-vol,c-sch,n-cond,neutron,q-svc,q-agt,q-dhcp,q-l3,q-meta,n-novnc,n-xvnc,g-api,key,n-api,n-crt
+
+FORCE=yes
+
+DATABASE_PASSWORD=mysecret
+ADMIN_PASSWORD=mysecret
+SERVICE_PASSWORD=mysecret
+SERVICE_TOKEN=mysecret
+RABBIT_PASSWORD=mysecret
+
+# Compute Service
+NOVA_BRANCH=stable/havana
+# Volume Service
+CINDER_BRANCH=stable/havana
+# Image Service
+GLANCE_BRANCH=stable/havana
+# Web UI (Dashboard)
+HORIZON_BRANCH=stable/havana
+# Auth Services
+KEYSTONE_BRANCH=stable/havana
+# Quantum (Network) service
+QUANTUM_BRANCH=stable/havana
+# Ceilometer (Network) service
+CEILOMETER_BRANCH=stable/havana
+HEAT_BRANCH=stable/havana
+#Enable Logging
+
+MY_IP=`/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
+HOST_IP=$MY_IP
+FLAT_INTERFACE=eth1
+
+FLOATING_RANGE=10.10.10.0/24
+FLOATING_GW_IP=10.10.10.1
+STARTING_FLOATING_IP=10.10.10.10
+END_FLOATING_IP=10.10.10.100
+
+DNS_NAME_SERVER=8.8.8.8
+DNS_NAMESERVER=$DNS_NAME_SERVER
+FLAT_NETWORK_BRIDGE=br-int
+LOGFILE=/opt/stack/logs/stack.sh.log
+VERBOSE=True
+LOG_COLOR=False
+SCREEN_LOGDIR=/opt/stack/logs
+
+# Ceilometer
+ENABLED_SERVICES=$ENABLED_SERVICES,ceilometer,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-singleton,ceilometer-evaluator
+
+#ENABLED_SERVICES=$ENABLED_SERVICES,heat,h-eng,h-api,h-api-cfn,h-api-cw
+
+#ENABLED_SERVICES=$ENABLED_SERVICES,trove,tr-api,tr-tmgr,ryu
+
+# Swift configuration
+ENABLED_SERVICES=$ENABLED_SERVICES,swift
+SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5c2000f5
+SWIFT_REPLICAS=1
+#SWIFT_DATA_DIR=/stack_data
+#SWIFT_LOOPBACK_DISK_SIZE=50000000
+#SWIFT_DRIVE=/dev/sdb1
+SWIFT_LOOPBACK_DISK_SIZE=5000000000
+
+PUBLIC_NETWORK_GATEWAY=10.10.10.1
+Q_PLUGIN=janus
+RYU_API_HOST=$SERVICE_HOST
+RYU_OFP_HOST=$SERVICE_HOST
+
+Q_OVS_USE_VETH=False
+FIXED_RANGE_DEMO1=192.168.0.0/24
+NETWORK_GATEWAY_DEMO1=192.168.0.1
+FIXED_RANGE_DEMO2=192.168.1.0/24
+NETWORK_GATEWAY_DEMO2=192.168.1.1
+
+FLOATING_RANGE=10.100.10.0/24
+PUBLIC_NETWORK_GATEWAY=10.100.10.1
+Q_FLOATING_ALLOCATION_POOL="start=10.100.10.2,end=10.100.10.100"
+
+#Q_FLOATING_ALLOCATION_POOL="start=130.127.135.2,end=130.127.135.17"
+#FLOATING_RANGE=130.127.132.0/22
+#PUBLIC_NETWORK_GATEWAY=130.127.132.1
+
+RYU_APPS=ryu.app.ofctl_rest,ryu.app.ryu2janus,ryu.app.discovery,ryu.app.rest_discovery
+
+# KEYSTONE
+KEYSTONE_TOKEN_FORMAT=UUID
+KEYSTONE_CATALOG_BACKEND=sql
+KEYSTONE_TYPE=LOCAL
+#KEYSTONE_TYPE=CENTRAL
+REGION_NAME=EDGE-HD-1
+KEYSTONE_AUTH_HOST=$MY_IP
+#KEYSTONE_AUTH_HOST=10.7.1.3
+REGIONS=EDGE-HD-1
+
+ENABLED_SERVICES=$ENABLED_SERVICES,ryu
+RYU_API_HOST=$MY_IP
+RYU_OFP_HOST=$MY_IP
+RYU_API_PORT=8090
+RYU_OFP_PORT=6633
+
+ENABLED_SERVICES=$ENABLED_SERVICES,janus
+JANUS_API_HOST=$MY_IP
+JANUS_API_PORT=8091
+
+OVS_ENABLE_TUNNELING=False
+
+
+ENABLED_SERVICES=$ENABLED_SERVICES,janus,whale,neo4j,w-sync,w-api
+
+#WHALE_CONF_SOURCE=$TOP_DIR/samples/whale/whale-vbox-graph.xml
+WHALE_CONF_SOURCE=$TOP_DIR/vbox-graph.xml
+
+REMOTE_USERS="$MY_IP,127.0.0.1,10.12.1.4,10.12.1.44"
+
+JANUS_NETWORK_APPS="janus.network.apps.circuit_installation.Circuit_Installation,janus.network.apps.arp_only.Arp_Only"
+
+#  IMPORTANT!!!
+#  never share your github user/pass
+#GITHUB_CRED="user:password@.
+
+NOVA_REPO=https://github.com/savi-dev/nova.git
+NOVA_BRANCH=s-havana
+
+NEUTRON_REPO=https://github.com/savi-dev/quantum.git
+NEUTRON_BRANCH=s-havana
+
+GLANCE_REPO=https://github.com/savi-dev/glance.git
+GLANCE_BRANCH=s-havana
+
+JANUS_REPO=https://${GITHUB_CRED}github.com/hadib/janus.git
+JANUS_BRANCH=s-havana
+
+# JANUS CLIENT
+JANUSCLIENT_REPO=https://${GITHUB_CRED}github.com/savi-dev/python-janusclient.git
+JANUSCLIENT_BRANCH=master
+
+# WHALE
+WHALE_REPO=https://${GITHUB_CRED}github.com/hadib/whale.git
+WHALE_BRANCH=s-havana
+
+# WHALE CLIENT
+WHALECLIENT_REPO=https://${GITHUB_CRED}github.com/hadib/python-whaleclient.git
+WHALECLIENT_BRANCH=in-devel
+
+RYU_REPO=https://${GITHUB_CRED}github.com/hadib/ryu.git
+RYU_BRANCH=in-devel
+
+NEUTRONCLIENT_REPO=https://github.com/savi-dev/python-quantumclient.git
+NEUTRONCLIENT_BRANCH=s-havana
+
+KEYSTONECLIENT_REPO=https://github.com/savi-dev/python-keystoneclient.git
+KEYSTONECLIENT_BRANCH=s-havana
+
+NOVA_VIF_DRIVER=nova.virt.libvirt.vif.LibvirtJanusHybridOVSBridgeDriver
+
+#DATAPATH_ID=0000ded359dc7343
+
+ENABLED_SERVICES=$ENABLED_SERVICES,g-api
+#GLANCE_REGISTRY_HOST=10.7.1.3
+#GLANCE_REGISTRY_PORT=9191
+#GLANCE_API_FLAVOR=keystone+cachemanagement
+GLANCE_CACHE_MAX_SIZE=1000000000
+GLANCE_CACHE_PRUNER_INTERVAL=/5
+GLANCE_CACHE_CLEANER_INTERVAL=/10
+
+ENABLED_SERVICES=$ENABLED_SERVICES,g-reg
+
+LIBVIRT_FIREWALL_DRIVER=nova.virt.firewall.NoopFirewallDriver
+
+ENABLED_SERVICES=$ENABLED_SERVICES,arp
+Q_L3_ENABLED=True
+
+PUBLIC_NETWORK_NAME=ext_net
+ENABLED_SERVICES=$ENABLED_SERVICES,ceil-of,ceil-phy,ceil-comp

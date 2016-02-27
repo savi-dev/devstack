@@ -8,6 +8,10 @@ source openrc
 
 source lib/neutron
 
+DNS_NAMESERVER=`sudo cat /etc/resolv.conf | grep name | awk '{print $2}' | head`
+
+export DNS_NAMESERVER
+
 create_neutron_initial_network
 
 sleep 5
