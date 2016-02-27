@@ -4,11 +4,11 @@ MYIP=`/sbin/ifconfig br-ex | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'
 
 #sudo ifconfig br-ex 10.10.10.1/24 up
 #sudo ifconfig br-ex mtu 1400
-sudo ip route add 10.20.0.0/16 via 130.127.135.2 
+#sudo ip route add 10.20.0.0/16 via 130.127.135.2 
 #sudo iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o eth0 -j SNAT --to-source $MYIP
-QR=qrouter-39c12051-1c57-430b-acee-a75955bd0010
+QR=qrouter-71a89515-8d38-4632-aa05-2ea90a192b09
 
-sudo ip netns exec $QR ip route add 10.10.200.0/24 via $MYIP
+#sudo ip netns exec $QR ip route add 10.10.20.0/24 via $MYIP
 
 sudo ip link set o1 netns $QR
 sudo ip netns exec $QR ifconfig o1 10.0.0.20/24 up
